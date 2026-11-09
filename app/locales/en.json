@@ -18,6 +18,43 @@
       }
     }
   },
+  "auth_pages": {
+    "login_subtitle": "Sign in with email or Google",
+    "login_link": "Already have an account? Sign in",
+    "register_title": "Create account",
+    "register_subtitle": "Register with email or continue with Google",
+    "register_link": "Need an account? Register",
+    "register_submit": "Create account",
+    "forgot_title": "Reset password",
+    "forgot_subtitle": "Verify access, then set a new password for your account",
+    "forgot_link": "Forgot password?",
+    "forgot_submit": "Reset password",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "confirmPassword": "Confirm password",
+    "confirmPasswordPlaceholder": "Repeat your password",
+    "newPassword": "New password",
+    "newPasswordPlaceholder": "Your new password",
+    "google_continue": "Continue with Google",
+    "validations": {
+      "name": {
+        "required": "Name is required"
+      },
+      "confirmPassword": {
+        "required": "Please confirm your password",
+        "match": "Passwords must match"
+      }
+    },
+    "google_client": {
+      "missing": "Google OAuth Client ID is required — click to configure",
+      "configured": "Update Google OAuth Client ID",
+      "help": "Paste a Web application Client ID from Google Cloud Console (APIs & Services → Credentials). Authorized JavaScript origin must include this app URL, for example http://localhost:3000.",
+      "placeholder": "1234567890-abc.apps.googleusercontent.com",
+      "save": "Save Client ID",
+      "saved": "Google Client ID saved. You can continue with Google now.",
+      "invalid": "Enter a valid Client ID ending with .apps.googleusercontent.com"
+    }
+  },
   "home": {
     "welcome": "👋 Welcome back, Manager",
     "stats": {

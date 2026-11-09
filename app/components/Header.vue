@@ -3,7 +3,7 @@
     <div
       :class="[
         'container header_content ',
-        { login_header: $route.path.endsWith('login') },
+        { login_header: isAuthRoute($route.path) },
       ]"
     >
       <div class="image">
@@ -14,7 +14,9 @@
   </header>
 </template>
 
-<script setup></script>
+<script setup>
+import { isAuthRoute } from "~/utils/authRoutes";
+</script>
 
 <style lang="scss" scoped>
 header {

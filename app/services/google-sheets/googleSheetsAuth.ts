@@ -23,6 +23,17 @@ declare global {
 const STORAGE_KEY_TOKEN = 'cms_google_access_token';
 const STORAGE_KEY_EXPIRES = 'cms_google_token_expires_at';
 const STORAGE_KEY_CLIENT_ID = 'cms_google_client_id';
+const CLIENT_ID_PATTERN = /\.apps\.googleusercontent\.com$/;
+
+export const GOOGLE_CLIENT_ID_ERROR =
+  'Please configure a valid Google Cloud OAuth Client ID to authenticate.';
+
+export class GoogleClientIdError extends Error {
+  constructor(message = GOOGLE_CLIENT_ID_ERROR) {
+    super(message);
+    this.name = 'GoogleClientIdError';
+  }
+}
 
 class GoogleSheetsAuthService {
   private tokenClient: any = null;
@@ -62,18 +73,23 @@ class GoogleSheetsAuthService {
     return this.loadPromise;
   }
 
+  public isValidClientId(clientId?: string | null): boolean {
+    return Boolean(clientId && CLIENT_ID_PATTERN.test(clientId.trim()));
+  }
+
   /**
    * Retrieve active Client ID from config, localStorage, or runtime.
    */
   public getClientId(): string {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY_CLIENT_ID);
-      if (saved) return saved;
+      if (this.isValidClientId(saved)) return saved!.trim();
     }
     try {
       const config = useRuntimeConfig();
-      if (config.public?.googleClientId) {
-        return config.public.googleClientId as string;
+      const fromConfig = config.public?.googleClientId as string | undefined;
+      if (this.isValidClientId(fromConfig)) {
+        return fromConfig!.trim();
       }
     } catch {
       // RuntimeConfig not ready or in non-Nuxt context
@@ -101,7 +117,7 @@ class GoogleSheetsAuthService {
     }
 
     const effectiveClientId = clientId || this.getClientId();
-    if (!effectiveClientId) {
+    if (!this.isValidClientId(effectiveClientId)) {
       console.warn('[GoogleSheetsAuth] No Google Client ID configured yet.');
       return null;
     }
@@ -153,7 +169,7 @@ class GoogleSheetsAuthService {
     }
 
     if (!this.tokenClient) {
-      throw new Error('Please configure a valid Google Cloud OAuth Client ID to authenticate.');
+      throw new GoogleClientIdError();
     }
 
     return new Promise((resolve, reject) => {

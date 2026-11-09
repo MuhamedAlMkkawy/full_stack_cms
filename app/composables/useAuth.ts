@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import { googleSheetsAuth } from '../services/google-sheets/googleSheetsAuth';
+import { googleSheetsAuth, GoogleClientIdError } from '../services/google-sheets/googleSheetsAuth';
 import { usersRepository } from '../repositories/users.repository';
 import { organizationsRepository } from '../repositories/organizations.repository';
 import { useAuthStore } from '../stores/authStore';
@@ -15,6 +15,12 @@ export function useAuth() {
     return Boolean(authStore.user?.token);
   });
 
+  const requireGoogleClientId = () => {
+    if (!googleSheetsAuth.isValidClientId(googleSheetsAuth.getClientId())) {
+      throw new GoogleClientIdError();
+    }
+  };
+
   /**
    * Log in using email and password against the Google Sheets Users table.
    */
@@ -22,6 +28,9 @@ export function useAuth() {
     loading.value = true;
     error.value = null;
     try {
+      requireGoogleClientId();
+      await googleSheetsAuth.requestAccessToken(false);
+
       // 1. Verify user in Google Sheets Users worksheet
       let user = await usersRepository.verifyCredentials(email, password);
 
@@ -74,12 +83,81 @@ export function useAuth() {
   };
 
   /**
-   * Authenticate directly via Google OAuth 2.0 (Google Identity Services).
+   * Register a new user in the Google Sheets Users worksheet.
    */
+  const registerWithCredentials = async (
+    name: string,
+    email: string,
+    password: string
+  ): Promise<boolean> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      requireGoogleClientId();
+      await googleSheetsAuth.requestAccessToken(false);
+
+      const existing = await usersRepository.findByEmail(email);
+      if (existing) {
+        error.value = 'An account with this email already exists';
+        return false;
+      }
+
+      const user = await usersRepository.createUserWithPassword(
+        {
+          email: email.trim().toLowerCase(),
+          name: name.trim() || email.split('@')[0],
+          status: 'active',
+        },
+        password
+      );
+
+      currentUser.value = user;
+      authStore.handleUserData({
+        token: user.id,
+        role: 'admin',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+      });
+      return true;
+    } catch (err: any) {
+      error.value = err?.message || 'Registration failed';
+      console.error('[useAuth] Register error:', err);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const resetPassword = async (email: string, newPassword: string): Promise<boolean> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      requireGoogleClientId();
+      await googleSheetsAuth.requestAccessToken(false);
+
+      const updated = await usersRepository.updatePassword(email, newPassword);
+      if (!updated) {
+        error.value = 'No account found for this email';
+        return false;
+      }
+      return true;
+    } catch (err: any) {
+      error.value = err?.message || 'Password reset failed';
+      console.error('[useAuth] Password reset error:', err);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const loginWithGoogle = async (): Promise<boolean> => {
     loading.value = true;
     error.value = null;
     try {
+      requireGoogleClientId();
       const accessToken = await googleSheetsAuth.requestAccessToken(true);
       if (!accessToken) {
         error.value = 'Google sign-in was canceled or failed';
@@ -146,6 +224,8 @@ export function useAuth() {
     error,
     isAuthenticated,
     loginWithCredentials,
+    registerWithCredentials,
+    resetPassword,
     loginWithGoogle,
     logout,
   };

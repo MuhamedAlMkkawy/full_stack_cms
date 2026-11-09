@@ -1,6 +1,7 @@
 import { defineNuxtRouteMiddleware, navigateTo } from "nuxt/app";
 import { useAuthStore } from "~/stores/authStore";
 import { useGlobalStore } from "~/stores/globalStore";
+import { isAuthRoute } from "~/utils/authRoutes";
 
 export default defineNuxtRouteMiddleware((to) => {
   const authStore = useAuthStore();
@@ -9,8 +10,7 @@ export default defineNuxtRouteMiddleware((to) => {
   const lang = globalStore.lang || "en";
   const localePrefix = lang === "en" ? "" : `/${lang}`;
 
-  const isLoginPage =
-    to.path == "/login" || to.path == `${localePrefix}/login`;
+  const isAuthPage = isAuthRoute(to.path);
 
   const isPublicRoute =
     to.path.startsWith("/sites") ||
@@ -29,16 +29,16 @@ export default defineNuxtRouteMiddleware((to) => {
     return;
   }
 
-  // Logged in → block login page
+  // Logged in → block auth pages
   if (authed) {
-    if (isLoginPage) {
+    if (isAuthPage) {
       return navigateTo(localePrefix ? `${localePrefix}/` : "/");
     }
     return;
   }
 
-  // Not logged in → force login
-  if (!isLoginPage) {
+  // Not logged in → allow any auth page, otherwise force login
+  if (!isAuthPage) {
     return navigateTo(localePrefix ? `${localePrefix}/login` : "/login");
   }
 });

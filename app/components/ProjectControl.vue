@@ -24,7 +24,7 @@
       class="logout_btn main-btn danger"
       :title="$t('logout.text')"
       @click="handleLogout"
-      v-if="!$route.path.endsWith('/login')"
+      v-if="!isAuthRoute($route.path)"
     >
       <i class="pi pi-sign-out"></i>
     </button>
@@ -34,6 +34,7 @@
 
 <script setup>
 import { useRoute } from 'vue-router';
+import { isAuthRoute } from '~/utils/authRoutes';
 import { usePublishing } from '@/composables/usePublishing';
 import { useToastMsg } from '@/composables/useToastMsg';
 

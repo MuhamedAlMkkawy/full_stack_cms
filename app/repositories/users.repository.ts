@@ -52,6 +52,22 @@ export class UsersRepository extends BaseRepository<User> {
     const isValid = await verifyPassword(plainPassword, user.salt, user.password_hash);
     return isValid ? user : null;
   }
+
+  /**
+   * Replace a user's password hash after Google Sheets access is granted.
+   */
+  public async updatePassword(email: string, plainPassword: string): Promise<User | null> {
+    const user = await this.findByEmail(email);
+    if (!user) return null;
+
+    const salt = generateSalt();
+    const passwordHash = await hashPassword(plainPassword, salt);
+    return await this.update(user.id, {
+      salt,
+      password_hash: passwordHash,
+      updated_at: new Date().toISOString(),
+    });
+  }
 }
 
 export const usersRepository = new UsersRepository();

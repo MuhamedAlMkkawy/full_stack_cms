@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     public: {
       apiBase: "https://sheets.googleapis.com/v4/spreadsheets/",
       googleSpreadsheetId: "1lMK248oPi3NxFSLyZbk-y09UEcwFMep5fnGhkFBDl4M",
-      googleClientId: "",
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || "",
     },
   },
 
@@ -134,6 +134,7 @@ export default defineNuxtConfig({
   },
 
   css: [
+    "@/assets/scss/_auth-page.scss",
     "@/assets/scss/_generic.scss",
     "@/assets/scss/_main-btn.scss",
     "@/assets/scss/_form.scss",

@@ -18,6 +18,43 @@
       }
     }
   },
+  "auth_pages": {
+    "login_subtitle": "سجّل الدخول بالبريد أو عبر Google",
+    "login_link": "لديك حساب؟ تسجيل الدخول",
+    "register_title": "إنشاء حساب",
+    "register_subtitle": "أنشئ حسابًا بالبريد أو تابع عبر Google",
+    "register_link": "تحتاج حسابًا؟ إنشاء حساب",
+    "register_submit": "إنشاء حساب",
+    "forgot_title": "إعادة تعيين كلمة المرور",
+    "forgot_subtitle": "تحقق من الوصول ثم عيّن كلمة مرور جديدة لحسابك",
+    "forgot_link": "نسيت كلمة المرور؟",
+    "forgot_submit": "إعادة تعيين كلمة المرور",
+    "name": "الاسم",
+    "namePlaceholder": "اسمك",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
+    "newPassword": "كلمة المرور الجديدة",
+    "newPasswordPlaceholder": "كلمة المرور الجديدة",
+    "google_continue": "المتابعة مع Google",
+    "validations": {
+      "name": {
+        "required": "الاسم مطلوب"
+      },
+      "confirmPassword": {
+        "required": "يرجى تأكيد كلمة المرور",
+        "match": "كلمتا المرور غير متطابقتين"
+      }
+    },
+    "google_client": {
+      "missing": "معرّف عميل Google OAuth مطلوب — اضغط للتهيئة",
+      "configured": "تحديث معرّف عميل Google OAuth",
+      "help": "الصق معرّف عميل تطبيق ويب من Google Cloud Console (APIs & Services → Credentials). يجب أن يتضمن Authorized JavaScript origin عنوان هذا التطبيق مثل http://localhost:3000.",
+      "placeholder": "1234567890-abc.apps.googleusercontent.com",
+      "save": "حفظ معرّف العميل",
+      "saved": "تم حفظ معرّف العميل. يمكنك المتابعة مع Google الآن.",
+      "invalid": "أدخل معرّف عميل صالح ينتهي بـ .apps.googleusercontent.com"
+    }
+  },
   "home": {
     "welcome": "👋 أهلًا بك مجددًا، أيها المدير",
     "stats": {
