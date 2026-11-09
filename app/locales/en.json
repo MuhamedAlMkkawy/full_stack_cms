@@ -1,0 +1,264 @@
+{
+  "login_page": {
+    "title": "Login Page",
+    "email": "Email",
+    "emailPlaceholder": "Your Email",
+    "password": "Password",
+    "passwordPlaceholder": "Your Password",
+    "submit_button": "Submit",
+    "validations": {
+      "email": {
+        "required": "Email is required",
+        "invalid": "Please enter a valid email address"
+      },
+      "password": {
+        "required": "Password is required",
+        "invalid": "Please enter a valid Password",
+        "min": "Password must be at least 6 characters long"
+      }
+    }
+  },
+  "home": {
+    "welcome": "👋 Welcome back, Manager",
+    "stats": {
+      "projects": "Projects",
+      "pages": "Pages",
+      "sections": "Sections",
+      "components": "Components"
+    },
+    "logoAlt": "logo image"
+  },
+  "projects": {
+    "draft": "Draft project",
+    "undraft": "Undraft project",
+    "addProject": "Add project",
+    "logoAlt": "logo image"
+  },
+  "project": {
+    "uploadLogo": "Upload Logo",
+    "submit": "Submit",
+    "errors": {
+      "logoRequired": "You should upload Logo to Continue..."
+    },
+    "fields": {
+      "arName": "Project Name in Arabic",
+      "enName": "Project Name in English",
+      "arDescription": "Project Description in Arabic",
+      "enDescription": "Project Description in English"
+    }
+  },
+  "projectEditor": {
+    "back": "Back",
+    "addPage": "Add Page",
+    "addNewPage": "Add Page",
+    "addSection": "Add Section",
+    "save": "Save",
+    "menu": {
+      "hide": "Hide",
+      "show": "Show",
+      "edit": "Edit"
+    },
+    "errors": {
+      "invalidPageId": "Page Not Found",
+      "sectionNotFound": "Section not found",
+      "componentNotFound": "Component not found",
+      "pageContentRequired": "You have to add data for the page to be added..."
+    },
+    "placeholders": {
+      "dropHere": "Drop here"
+    },
+
+    "buttons": {
+      "editSection": "Edit Section",
+      "deleteSection": "Delete Section",
+      "toggleVisibility": "Toggle Visibility",
+      "editComponent": "Edit Component",
+      "removeComponent": "Remove Component"
+    },
+
+    "alts": {
+      "logo": "logo image"
+    }
+  },
+  "pagePopup": {
+    "title": "Page Name",
+    "placeholder": "Name",
+    "slug_placeholder" : "Slug",
+    "submit": "Submit",
+    "emptyError": "You should add the page name to continue!"
+  },
+  "sectionPopup": {
+    "title": "Section Name",
+    "placeholder": "Name",
+    "submit": "Submit",
+    "emptyError": "You should add the section name to continue!"
+  },
+  "iconPicker": {
+    "label": "Search an Icon",
+    "placeholder": "Search icon..."
+  },
+  "accordion": {
+    "title": "Accordion",
+    "item": "Item",
+    "fields": {
+      "titleLabel": "Title",
+      "titlePlaceholder": "Accordion title",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Accordion content..."
+    },
+    "actions": {
+      "addItem": "Add Item",
+      "submit": "Submit"
+    },
+    "errors": {
+      "atLeastOne": "At least one accordion item is required",
+      "fillAll": "Please fill all accordion titles and contents"
+    }
+  },
+  "buttons": {
+    "title": "Buttons",
+
+    "fields": {
+      "icon": "Icon",
+      "title": "Button Title",
+      "link": "Button Link",
+      "target": "Target",
+      "reversed": "Reversed"
+    },
+
+    "placeholders": {
+      "title": "Button title",
+      "link": "Button link"
+    },
+
+    "targets": {
+      "self": "Same Tab",
+      "blank": "New Tab"
+    },
+
+    "actions": {
+      "addButton": "Add Button",
+      "submit": "Submit"
+    },
+
+    "errors": {
+      "minButton": "At least one button is required",
+      "fillButton": "Please fill title and link for at least one button"
+    }
+  },
+  "cardSlider": {
+    "title": "Card Slider",
+    "itemsToShow": "Items To Show",
+    "autoplay": "Autoplay",
+    "cardItems": "Card Items",
+    "uploadImage": "Upload Image",
+    "placeholders": {
+      "title": "Card Title",
+      "text": "Card Text",
+      "link": "Route / Link"
+    },
+    "submit": "Submit",
+    "errors": {
+      "noFile": "No file found to upload",
+      "minCard": "You should add at least one card.",
+      "fillCard": "Please fill all fields for card #{index}"
+    }
+  },
+  "customHtml": {
+    "title": "Custom HTML Section",
+    "placeholder": "Write or paste HTML here...",
+    "submit": "Submit",
+    "emptyError": "Content cannot be empty"
+  },
+  "logo": {
+    "title": "Logo Component",
+    "upload": "Upload Logo",
+    "previewAlt": "logo image",
+    "widthLabel": "Width (px)",
+    "widthPlaceholder": "Example: 150",
+    "heightLabel": "Height (px)",
+    "heightPlaceholder": "Example: 50",
+    "submit": "Submit",
+    "noFile": "No file selected",
+    "invalidFile": "Only JPG, PNG, WEBP, GIF, or SVG images are allowed",
+    "imageRequired": "Logo image is required"
+  },
+  "navMenu": {
+    "title": "Nav Menu",
+    "icon": "Icon",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Route title",
+    "linkLabel": "Link",
+    "linkPlaceholder": "Route link",
+    "targetLabel": "Target",
+    "sameTab": "Same Tab",
+    "newTab": "New Tab",
+    "hasChilds": "Has Childs",
+    "subMenuFor": "Sub Menu for:",
+    "subTitleLabel": "Sub Menu Title",
+    "subTitlePlaceholder": "Sub Menu title",
+    "subLinkLabel": "Sub Menu link",
+    "subLinkPlaceholder": "Sub Menu link",
+    "subTargetLabel": "Sub Menu Target",
+    "addMenuItem": "Add Menu Item",
+    "submit": "Submit",
+    "menuMinError": "Menu should have at least one Route",
+    "fillAllError": "Please fill all titles and links to continue"
+  },
+  "social": {
+    "title": "Social Links",
+    "icon": "Icon",
+    "color": "Color",
+    "link": "Link",
+    "linkPlaceholder": "https://example.com",
+    "addLink": "Add Link",
+    "submit": "Submit",
+    "minError": "At least one social link is required",
+    "fillAllError": "Please enter a link for each item"
+  },
+  "tabs": {
+    "title": "Tabs Fields",
+    "tab": "Tab",
+    "tabTitle": "Tab Title",
+    "tabTitlePlaceholder": "Tab title",
+    "tabDescription": "Tab Description",
+    "tabDescriptionPlaceholder": "Tab description...",
+    "addTab": "Add Tab",
+    "submit": "Submit",
+    "minError": "At least one tab is required",
+    "fillAllError": "Please fill all tab titles and descriptions"
+  },
+  "timeline": {
+    "title": "Timeline",
+    "item": "Item",
+    "icon": "Icon",
+    "date": "Date",
+    "titleField": "Title",
+    "titlePlaceholder": "Timeline title",
+    "description": "Description",
+    "descriptionPlaceholder": "Timeline description...",
+    "addItem": "Add Item",
+    "submit": "Submit",
+    "minError": "At least one timeline item is required",
+    "fillAllError": "Please fill all timeline fields"
+  },
+  "empty": {
+    "text": "No Content Found Yet"
+  },
+  "toast": {
+    "error": "Error",
+    "success": "Success",
+    "info": "Info",
+    "warn": "Warning"
+  },
+  "authorization": {
+    "error": "You must be logged in to continue."
+  },
+  "error_page": {
+    "title": "Page is Not Found",
+    "home_button": "Go To Home Page"
+  },
+  "logout": {
+    "text": "Logout"
+  }
+}

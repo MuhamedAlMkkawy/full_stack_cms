@@ -1,0 +1,51 @@
+// DISPLAY FLEX MIXIN
+@mixin displayFlex(
+  $direction: row,
+  $align: center,
+  $justify: center,
+  $wrap: nowrap,
+  $gap: 10px 20px
+) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: $align;
+  justify-content: $justify;
+  flex-wrap: $wrap;
+  gap: $gap;
+}
+
+/* display grid mixin 
+DEFAULT VALUE 265PX DIVIDE WRAPPER TO 3 COLUMS 
+YOU NEED TO PUT VALUE IN MIXIN WITH PX  >>>  EXAMPLE 
+@include displayGrid(265px);
+*/
+@mixin displayGrid($px: 265px, $gap: 20px, $fit: auto-fill) {
+  display: grid;
+  grid-template-columns: repeat($fit, minmax($px, 1fr));
+  gap: $gap;
+}
+
+/*
+---TEXT TRUNCATE
+> $lines => the max number of lines to show before ellipses.
+> $maxWidth => max width of text element.
+*/
+@mixin textTruncate($lines: 2, $maxWidth: 100%) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+  max-width: $maxWidth;
+  text-overflow: ellipsis;
+  text-wrap: pretty;
+}
+
+
+
+
+@mixin circle($value: 150px , $radius : 50%) {
+  width: $value;
+  height: $value;
+  border-radius: $radius;
+  overflow: hidden;
+}

@@ -1,0 +1,21 @@
+/* MAIN FONT FAMILY */
+$fontFamily: "Expo Arabic";
+
+// ========== DEFINE MAIN VARIABLES ==============
+
+// TRANSITIONS WITH DIFFRENT TIMES
+$transition: all 0.5s ease-in-out;
+$transition3: all 0.3s ease-in-out;
+$transition7: all 0.7s ease-in-out;
+
+
+/* MAIN FONT SIZE */
+$fontSize: clamp(14px , 2.5vw , 18px);
+
+/* COLORS VARIABLES */
+$mainColor: #1D5166; // main site color
+$secColor: #F05D2A; // secondary site color
+// $thirdColor: #01B582; // secondary site color
+$dangerColor: #F32323; // danger color
+$textColor: #1D1D1D;  // main text color
+// $btnColor:#4C637F;

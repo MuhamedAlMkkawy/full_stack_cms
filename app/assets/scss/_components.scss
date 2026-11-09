@@ -1,0 +1,106 @@
+.side_bar {
+  padding: 20px 0;
+  background: $mainColor;
+  position: fixed;
+  inset-inline-start: 0;
+  top: 0;
+  max-width: 250px;
+  width: 100%;
+  height: 100vh;
+  z-index: 9;
+  box-shadow: 0 0 10px #8483838c;
+  ::-webkit-scrollbar {
+    width: 2px !important;
+  }
+  .header_image {
+    @include displayFlex();
+    margin: 0 auto 20px;
+    .back_btn {
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border: 1px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0 8px 8px 0;
+      flex-shrink: 0;
+      i.pi {
+        font-size: 24px;
+      }
+      &:hover {
+        background: $mainColor;
+        color: #fff;
+      }
+
+      &.ar_btn{
+        border-radius: 8px 0 0 8px;
+      }
+    }
+    .image {
+      max-width: 200px;
+      padding-inline: 10px;
+      + hr {
+        background: #e4e4e4 !important;
+      }
+    }
+    &:last-of-type {
+      padding: 10px 0 15px;
+      background: #fff;
+      position: absolute;
+      bottom: 0;
+      margin-bottom: 0;
+      width: 100%;
+      min-height: 74px;
+    }
+  }
+}
+
+.components {
+  @include displayFlex($direction: column, $justify: start, $align: start);
+  // margin-top: 20px;
+  max-height: 92vh;
+  height: 100%;
+  overflow-y: scroll;
+  padding-block: 10px 0px;
+}
+
+.component_item {
+  @include displayFlex($gap: 8px, $justify: start);
+  padding: 8px;
+  padding-inline-end: 8px;
+  border: 1px solid #fff;
+  width: 95%;
+  color: #fff;
+  margin: 0 auto;
+  transition: 0.5s;
+  border-radius: 4px;
+  user-select: none;
+  cursor: grab;
+  &:hover {
+    background: #fff;
+    color: $mainColor;
+  }
+  &.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+    transform: scale(0.95);
+    border: 1px dashed $mainColor;
+    background: color-mix(in srgb, $mainColor, white 15%);
+    color: $mainColor;
+  }
+
+  &.drag-preview {
+    background: $mainColor;
+    opacity: 1;
+  }
+  .pi:last-of-type {
+    opacity: 0.4;
+    margin-inline-start: auto;
+    font-size: 15px;
+  }
+
+  &:last-of-type {
+    margin-bottom: 8px;
+  }
+}

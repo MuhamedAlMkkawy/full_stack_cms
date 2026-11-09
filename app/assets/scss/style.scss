@@ -1,0 +1,229 @@
+// import variables
+// @import "./variables";
+// @import "./generic";
+// @import "./mixins";
+// @import "./main-btn";
+// @import "./form";
+// @import "./popup";
+// @import "./flex_buttons";
+// @import "./grid_items";
+// @import "./components";
+// @import "./sections";
+
+.page {
+  padding-block: 50px;
+}
+.container {
+  max-width: clamp(300px, 100%, 1800px);
+  margin: 0 auto;
+  padding-inline: 20px;
+  transition: 1s;
+  display: flex;
+  &.page_active {
+    // margin-inline-start: 275px !important;
+    justify-content: flex-end;
+    transition: 1s;
+    @media (max-width: 767px) {
+      transition: 1s;
+      margin-inline-start: 0 !important;
+    }
+  }
+}
+
+// GRADIENT BACKGROUND
+.gradient_background {
+  background: linear-gradient(84deg, #007593 3.25%, #044d60 96.85%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  background-size: 200% 200%;
+  min-height: 100vh;
+  @include displayFlex();
+  /* Subtle floating particles effect */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      radial-gradient(
+        circle at 20% 80%,
+        rgba(255, 255, 255, 0.1) 2%,
+        transparent 5%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(255, 255, 255, 0.1) 2%,
+        transparent 5%
+      ),
+      radial-gradient(
+        circle at 40% 40%,
+        rgba(255, 255, 255, 0.05) 3%,
+        transparent 8%
+      );
+    pointer-events: none;
+  }
+}
+
+// DRAFT ITEM STYLE
+.drafted_item {
+  background: grey !important;
+  border-color: grey !important;
+  .image {
+    filter: brightness(0) invert(1) !important;
+  }
+  &:hover {
+    background: grey !important;
+    .item_control {
+      opacity: 1 !important;
+      pointer-events: visible;
+    }
+  }
+}
+
+// --------------------------
+// ------- Red Msg ----------
+// --------------------------
+span[role="alert"] {
+  display: block;
+  color: red !important;
+  margin-bottom: 10px;
+  font-weight: 400;
+  font-size: 12px;
+  &::before {
+    content: "* ";
+  }
+}
+
+// ---------------------------
+// ------> ANIMATION <--------
+// ---------------------------
+@keyframes gradientShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+@keyframes floatParticles {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-15px);
+  }
+  75% {
+    transform: translateY(15px) translateX(5px);
+  }
+}
+
+// Style the spinner for the number input
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  display: none;
+}
+
+// STYLE THE TOGGLE BUTTON OF THE SLIDER POPUP
+.p-togglebutton-checked .p-togglebutton-content {
+  background: $mainColor !important;
+  color: #fff;
+}
+
+// STYLE THE EDITOR COMPONENT IN THE POPUP
+.p-editor {
+  // min-height: 400px;
+  max-height: 500px;
+  overflow-y: scroll;
+  min-height: 400px !important;
+}
+
+.p-editor .p-editor-content .ql-editor {
+  min-height: 420px;
+  background: #044d60;
+  color: #fff;
+}
+
+// STYLE THE HIDDEN ELEMENT
+.hidden_element {
+  background: grey !important;
+  border-color: grey;
+  color: #fff !important;
+  max-height: 90px;
+  overflow: hidden;
+  &.active {
+    background: $textColor !important;
+  }
+}
+
+// style the language switch
+.project_control {
+  @include displayFlex($gap: 4px);
+}
+header {
+  .project_control {
+    position: unset;
+    color: $mainColor !important;
+    .languages-switch {
+      a {
+        min-height: 42px;
+      }
+    }
+  }
+}
+.languages-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.5s;
+  i.pi {
+    // color: #fff;
+    font-size: 18px;
+  }
+
+  a {
+    @include displayFlex($gap: 5px, $direction: row, $justify: flex-start);
+    padding: 3px 8px;
+    height: 30px;
+    overflow: hidden;
+    cursor: pointer;
+    height: 45px;
+    background: #e8eef0;
+    border-radius: 4px;
+    span {
+      font-size: clamp(14px, 2.5vw, 20px);
+    }
+  }
+  &:hover {
+    a {
+      color: $mainColor;
+      border-radius: 4px;
+      background: #fff;
+    }
+    i.pi {
+      color: $mainColor;
+    }
+  }
+}
+
+// .project_page,
+// .modify_project_page {
+//   .languages-switch {
+//     position: unset;
+//     padding: 0;
+//     i.pi {
+//       color: $mainColor !important;
+//     }
+//     a {
+//       min-height: 40px;
+//       color: $mainColor !important;
+//     }
+//   }
+// }

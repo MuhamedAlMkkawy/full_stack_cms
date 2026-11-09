@@ -1,0 +1,264 @@
+{
+  "login_page": {
+    "title": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "كلمة المرور",
+    "submit_button": "تسجيل دخول",
+    "validations": {
+      "email": {
+        "required": "يجب إضافة البريد الالكتروني",
+        "invalid": "الرجاء إدخال بريد إلكتروني صالح"
+      },
+      "password": {
+        "required": "يجب إضافة كلمة المرور",
+        "invalid": "كلمة المرور غير صالحة",
+        "min": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل"
+      }
+    }
+  },
+  "home": {
+    "welcome": "👋 أهلًا بك مجددًا، أيها المدير",
+    "stats": {
+      "projects": "المشاريع",
+      "pages": "الصفحات",
+      "sections": "الأقسام",
+      "components": "العناصر"
+    },
+    "logoAlt": "صورة الشعار"
+  },
+  "projects": {
+    "draft": "أرشفة المشروع",
+    "undraft": "إظهار المشروع",
+    "addProject": "إضافة مشروع",
+    "logoAlt": "صورة الشعار"
+  },
+  "project": {
+    "uploadLogo": "رفع الشعار",
+    "submit": "إرسال",
+    "errors": {
+      "logoRequired": "يجب رفع الشعار للمتابعة..."
+    },
+    "fields": {
+      "arName": "اسم المشروع باللغة العربية",
+      "enName": "اسم المشروع باللغة الإنجليزية",
+      "arDescription": "وصف المشروع باللغة العربية",
+      "enDescription": "وصف المشروع باللغة الإنجليزية"
+    }
+  },
+  "projectEditor": {
+    "back": "رجوع",
+    "addPage": "إضافة صفحة",
+    "addNewPage": "إضافة صفحة جديدة",
+    "addSection": "إضافة قسم",
+    "save": "حفظ",
+    "menu": {
+      "hide": "إخفاء",
+      "show": "إظهار",
+      "edit": "تعديل"
+    },
+    "errors": {
+      "invalidPageId": "الصفحة غير موجوده",
+      "sectionNotFound": "القسم غير موجود",
+      "componentNotFound": "المكون غير موجود",
+      "pageContentRequired": "يجب إضافة بيانات للصفحة قبل الحفظ..."
+    },
+    "placeholders": {
+      "dropHere": "اسحب هنا"
+    },
+
+    "buttons": {
+      "editSection": "تعديل القسم",
+      "deleteSection": "حذف القسم",
+      "toggleVisibility": "إظهار / إخفاء",
+      "editComponent": "تعديل المكون",
+      "removeComponent": "حذف المكون"
+    },
+
+    "alts": {
+      "logo": "صورة الشعار"
+    }
+  },
+  "pagePopup": {
+    "title": "اسم الصفحة",
+    "placeholder": "الاسم",
+    "slug_placeholder" : "الرابط",
+    "submit": "إرسال",
+    "emptyError": "يجب إدخال اسم الصفحة للمتابعة!"
+  },
+  "sectionPopup": {
+    "title": "اسم القسم",
+    "placeholder": "الاسم",
+    "submit": "إرسال",
+    "emptyError": "يجب إدخال اسم القسم للمتابعة!"
+  },
+  "iconPicker": {
+    "label": "ابحث عن أيقونة",
+    "placeholder": "ابحث عن أيقونة..."
+  },
+  "accordion": {
+    "title": "الأكورديون",
+    "item": "عنصر",
+    "fields": {
+      "titleLabel": "العنوان",
+      "titlePlaceholder": "عنوان الأكورديون",
+      "contentLabel": "المحتوى",
+      "contentPlaceholder": "محتوى الأكورديون..."
+    },
+    "actions": {
+      "addItem": "إضافة عنصر",
+      "submit": "حفظ"
+    },
+    "errors": {
+      "atLeastOne": "يجب إضافة عنصر واحد على الأقل",
+      "fillAll": "يرجى ملء جميع عناوين ومحتويات الأكورديون"
+    }
+  },
+  "buttons": {
+    "title": "الأزرار",
+
+    "fields": {
+      "icon": "الأيقونة",
+      "title": "عنوان الزر",
+      "link": "رابط الزر",
+      "target": "الوجهة",
+      "reversed": "معكوس"
+    },
+
+    "placeholders": {
+      "title": "عنوان الزر",
+      "link": "رابط الزر"
+    },
+
+    "targets": {
+      "self": "نفس الصفحة",
+      "blank": "تبويب جديد"
+    },
+
+    "actions": {
+      "addButton": "إضافة زر",
+      "submit": "حفظ"
+    },
+
+    "errors": {
+      "minButton": "يجب إضافة زر واحد على الأقل",
+      "fillButton": "يرجى إدخال عنوان ورابط لزر واحد على الأقل"
+    }
+  },
+  "cardSlider": {
+    "title": "سلايدر الكروت",
+    "itemsToShow": "عدد العناصر المعروضة",
+    "autoplay": "تشغيل تلقائي",
+    "cardItems": "عناصر الكروت",
+    "uploadImage": "رفع صورة",
+    "placeholders": {
+      "title": "عنوان الكارت",
+      "text": "نص الكارت",
+      "link": "الرابط / المسار"
+    },
+    "submit" : "إرسال",
+    "errors": {
+      "noFile": "لم يتم العثور على ملف للرفع",
+      "minCard": "يجب إضافة كارت واحد على الأقل",
+      "fillCard": "يرجى إدخال جميع الحقول للكارت رقم {index}"
+    }
+  },
+  "customHtml": {
+    "title": "قسم HTML مخصص",
+    "placeholder": "اكتب أو الصق HTML هنا...",
+    "submit": "إرسال",
+    "emptyError": "لا يمكن أن يكون المحتوى فارغًا"
+  },
+  "logo": {
+    "title": "مكون الشعار",
+    "upload": "تحميل الشعار",
+    "previewAlt": "صورة الشعار",
+    "widthLabel": "العرض (px)",
+    "widthPlaceholder": "مثال: 150",
+    "heightLabel": "الارتفاع (px)",
+    "heightPlaceholder": "مثال: 50",
+    "submit": "إرسال",
+    "noFile": "لم يتم تحديد أي ملف",
+    "invalidFile": "يسمح فقط بصور JPG و PNG و WEBP و GIF و SVG",
+    "imageRequired": "صورة الشعار مطلوبة"
+  },
+  "navMenu": {
+    "title": "قائمة التنقل",
+    "icon": "الأيقونة",
+    "titleLabel": "العنوان",
+    "titlePlaceholder": "عنوان الرابط",
+    "linkLabel": "الرابط",
+    "linkPlaceholder": "رابط الصفحة",
+    "targetLabel": "الهدف",
+    "sameTab": "نفس التبويب",
+    "newTab": "تبويب جديد",
+    "hasChilds": "يحتوي على عناصر فرعية",
+    "subMenuFor": "القائمة الفرعية لـ:",
+    "subTitleLabel": "عنوان القائمة الفرعية",
+    "subTitlePlaceholder": "عنوان القائمة الفرعية",
+    "subLinkLabel": "رابط القائمة الفرعية",
+    "subLinkPlaceholder": "رابط القائمة الفرعية",
+    "subTargetLabel": "هدف القائمة الفرعية",
+    "addMenuItem": "إضافة عنصر قائمة",
+    "submit": "إرسال",
+    "menuMinError": "يجب أن تحتوي القائمة على عنصر واحد على الأقل",
+    "fillAllError": "يرجى ملء جميع العناوين والروابط للاستمرار"
+  },
+  "social": {
+    "title": "روابط التواصل الاجتماعي",
+    "icon": "الأيقونة",
+    "color": "اللون",
+    "link": "الرابط",
+    "linkPlaceholder": "https://example.com",
+    "addLink": "إضافة رابط",
+    "submit": "إرسال",
+    "minError": "مطلوب رابط اجتماعي واحد على الأقل",
+    "fillAllError": "يرجى إدخال رابط لكل عنصر"
+  },
+  "tabs": {
+    "title": "حقول التبويبات",
+    "tab": "تبويب",
+    "tabTitle": "عنوان التبويب",
+    "tabTitlePlaceholder": "عنوان التبويب",
+    "tabDescription": "وصف التبويب",
+    "tabDescriptionPlaceholder": "وصف التبويب...",
+    "addTab": "إضافة تبويب",
+    "submit": "إرسال",
+    "minError": "مطلوب تبويب واحد على الأقل",
+    "fillAllError": "يرجى ملء جميع عناوين التبويبات والوصف"
+  },
+  "timeline": {
+    "title": "الجدول الزمني",
+    "item": "عنصر",
+    "icon": "الأيقونة",
+    "date": "التاريخ",
+    "titleField": "العنوان",
+    "titlePlaceholder": "عنوان الجدول الزمني",
+    "description": "الوصف",
+    "descriptionPlaceholder": "وصف الجدول الزمني...",
+    "addItem": "إضافة عنصر",
+    "submit": "إرسال",
+    "minError": "مطلوب عنصر جدول زمني واحد على الأقل",
+    "fillAllError": "يرجى ملء جميع حقول الجدول الزمني"
+  },
+  "empty": {
+    "text": "لايوجد محتوي حتي الأن"
+  },
+  "toast": {
+    "error": "حدث خطأ",
+    "success": "تمت بـنجاح",
+    "info": "معلومة",
+    "warn": "تحذير"
+  },
+  "authorization": {
+    "error": "يجب تسجيل الدخول للمتابعة."
+  },
+  "error_page": {
+    "title": "الصفحة غير موجوده",
+    "home_button": "أذهب للرئيسية"
+  },
+  "logout":{
+    "text" : "تسجيل خروج"
+  }
+}

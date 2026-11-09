@@ -1,0 +1,182 @@
+.main-btn {
+	width: 100%;
+	height: 60px;
+	color: #fff;
+	background: $mainColor;
+	font-size: clamp(14px, 2.5vw, 18px);
+	font-weight: 500;
+	position: relative;
+	z-index: 3;
+	overflow: hidden;
+	border: 1px solid;
+	cursor: pointer;
+	border-radius: 10px;
+	font-family: $fontFamily !important;
+	margin: 20px auto 0;
+	box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+	// transition: box-shadow 0.4s ease, color 0.3s ease;
+	transition: 1s;
+	@include displayFlex($gap: 4px);
+	
+	.p-progressspinner {
+		margin: 0;
+	}
+	
+	&::after,
+	&::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 0;
+		height: 0;
+		background: #fff;
+		z-index: -1;
+		transform: translate(-50%, -50%);
+		opacity: 0;
+		transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+	}
+	
+	&::before {
+		transition-delay: 0.1s;
+	}
+	
+	i.pi {
+		font-size: 16px;
+	}
+	
+	&:hover {
+		animation: pulse-m 1s infinite;
+		
+		&::after,
+		&::before {
+			width: 100%;
+			height: 100%;
+			opacity: 1;
+		}
+		
+		color: $mainColor;
+		border: 1px solid $mainColor !important;
+	}
+	
+	&.centered {
+		max-width: 500px;
+		@include displayFlex();
+	}
+	
+	&.danger {
+		max-width: 700px;
+		@include displayFlex($gap: 4px);
+		background: $dangerColor;
+		
+		&:hover {
+			animation: pulse-danger 1s infinite;
+			border-color: $dangerColor !important;
+			color: $dangerColor;
+			
+			&::after,
+			&::before {
+				background: #fff;
+			}
+		}
+	}
+	
+	&:disabled {
+		user-select: none;
+		cursor: not-allowed;
+		animation: unset;	
+		background: #e4e4e4;
+		border: unset !important;
+		&:hover{
+			color: #fff;
+		}	
+		&::after,
+		&::before {
+			display: none !important;
+		}
+	}
+}
+
+.main-btn.reversed {
+	background: transparent;
+	color: $mainColor;
+	border: 1px solid $mainColor !important;
+	
+	&::after,
+	&::before {
+		background: $mainColor;
+	}
+	
+	&:hover {
+		color: #fff;
+		animation: pulse-reversed 1s infinite;
+	}
+	
+	&.danger {
+		border-color: $dangerColor !important;
+		color: $dangerColor;
+		&::after,
+		&::before {
+			background: $dangerColor;
+		}
+		
+		&:hover {
+			background: $dangerColor !important;
+			color: #fff;
+			animation: pulse-danger-reversed 1s infinite;
+			
+			&::after,
+			&::before {
+				background: $dangerColor;
+			}
+		}
+	}
+}
+
+@keyframes pulse-m {
+	0% {
+		box-shadow: 0 0 0 0 rgba($mainColor, 0.4);
+	}
+	70% {
+		box-shadow: 0 0 0 10px rgba($mainColor, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba($mainColor, 0);
+	}
+}
+
+@keyframes pulse-reversed {
+	0% {
+		box-shadow: 0 0 0 0 rgba($mainColor, 0.4);
+	}
+	70% {
+		box-shadow: 0 0 0 10px rgba($mainColor, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba($mainColor, 0);
+	}
+}
+
+@keyframes pulse-danger {
+	0% {
+		box-shadow: 0 0 0 0 rgba($dangerColor, 0.4);
+	}
+	70% {
+		box-shadow: 0 0 0 10px rgba($dangerColor, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba($dangerColor, 0);
+	}
+}
+
+@keyframes pulse-danger-reversed {
+	0% {
+		box-shadow: 0 0 0 0 rgba($dangerColor, 0.4);
+	}
+	70% {
+		box-shadow: 0 0 0 10px rgba($dangerColor, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba($dangerColor, 0);
+	}
+}
