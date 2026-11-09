@@ -39,8 +39,14 @@ export const useGlobalStore = defineStore('globalStore' , () => {
   persist: {
     storage: {
       getItem: (key) => {
-        const cookie = useCookie(key, { maxAge: 86400 }); // 1 day in seconds
-        return cookie.value ? JSON.parse(cookie.value) : null;
+        const cookie = useCookie(key, { maxAge: 86400 });
+        if (!cookie.value) return null;
+        if (typeof cookie.value === 'object') return cookie.value;
+        try {
+          return JSON.parse(cookie.value);
+        } catch {
+          return null;
+        }
       },
       setItem: (key, value) => {
         const cookie = useCookie(key, { maxAge: 86400 });

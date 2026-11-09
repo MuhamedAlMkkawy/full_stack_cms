@@ -23,6 +23,14 @@
           :placeholder="$t('login_page.passwordPlaceholder')"
         />
         <button class="main-btn">{{ $t("login_page.submit_button") }}</button>
+        <button
+          type="button"
+          class="main-btn google-btn"
+          @click="handleGoogleSignIn"
+        >
+          <i class="pi pi-google"></i>
+          <span>Continue with Google</span>
+        </button>
       </VeeForm>
       <!-- <LanguageSwitch /> -->
     </div>
@@ -35,6 +43,9 @@ const loginSchema = useLoginSchema();
 
 // DEFINE API METHODS
 const { submitMethod } = useApiMethods();
+const { loginWithGoogle } = useAuth();
+const router = useRouter();
+const localeRoute = useLocaleRoute();
 
 // DEFINE PAGE META
 // definePageMeta({
@@ -43,6 +54,13 @@ const { submitMethod } = useApiMethods();
 
 const handleSubmit = (values) => {
   submitMethod("login", false, values, "POST", "/");
+};
+
+const handleGoogleSignIn = async () => {
+  const success = await loginWithGoogle();
+  if (success) {
+    router.push(localeRoute("/"));
+  }
 };
 </script>
 
@@ -105,6 +123,21 @@ const handleSubmit = (values) => {
 
         &:active {
           transform: translateY(0);
+        }
+      }
+
+      .google-btn {
+        margin-block-start: 12px;
+        background: #ffffff !important;
+        color: #333333 !important;
+        border: 1px solid #d1d5db !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        &:hover {
+          background: #f3f4f6 !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
         }
       }
 

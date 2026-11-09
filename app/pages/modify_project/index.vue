@@ -89,7 +89,6 @@ const handleImageUpload = (file) => {
 
   if (!allowedTypes.includes(file.type)) {
     showErrorToast(t("logo.invalidFile"));
-    e.target.value = "";
     return;
   }
 
