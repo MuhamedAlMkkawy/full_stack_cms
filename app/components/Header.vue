@@ -1,11 +1,6 @@
 <template>
-  <header class="header">
-    <div
-      :class="[
-        'container header_content ',
-        { login_header: isAuthRoute($route.path) },
-      ]"
-    >
+  <header class="header" v-if="!isAuthRoute($route.path)">
+    <div class="container header_content">
       <div class="image">
         <img src="@/assets/images/logo.png" alt="image" loading="lazy" />
       </div>
@@ -29,13 +24,6 @@ header {
     width: 100%;
     .image {
       max-width: 200px;
-    }
-    &.login_header {
-      position: fixed;
-      max-width: 800px;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
     }
   }
 }

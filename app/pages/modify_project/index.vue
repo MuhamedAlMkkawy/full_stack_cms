@@ -6,28 +6,15 @@
         class="form"
         @submit="handleSubmit"
       >
-        <label for="upload_img" class="upload_image_icon image">
-          <img
-            v-if="image"
-            :src="image"
-            alt="project image"
-            loading="lazy"
+        <div class="project_logo_field">
+          <label class="field_label">
+            {{ t("project.uploadLogo") }}
+          </label>
+          <ImageUploader
+            v-model="image"
+            :max-size-mb="5"
           />
-          <i v-else class="pi pi-upload"></i>
-        </label>
-        <!-- {{ image }} -->
-
-        <label for="upload_img">
-          {{ t("project.uploadLogo") }}
-        </label>
-
-        <input
-          type="file"
-          accept="image/*"
-          @change="handleImageUpload($event.target.files[0])"
-          id="upload_img"
-          hidden
-        />
+        </div>
 
         <div class="inputs">
           <CustomField
@@ -76,33 +63,7 @@ definePageMeta({
   layout: "none",
 });
 
-const image = ref();
-
-const handleImageUpload = (file) => {
-  const allowedTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-    "image/svg+xml",
-  ];
-
-  if (!allowedTypes.includes(file.type)) {
-    showErrorToast(t("logo.invalidFile"));
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  submitMethod("/uploads/single", true , formData, "POST", null);
-};
-
-watchEffect(() => {
-  if (submitResult?.value) {
-    image.value = submitResult?.value?.data?.path;
-  }
-});
+const image = ref("");
 
 const handleSubmit = (values) => {
   if (!image.value) {
@@ -159,6 +120,20 @@ const handleSubmit = (values) => {
           margin-bottom: 50px;
           // color: $mainColor;
           text-align: center;
+        }
+      }
+
+      .project_logo_field {
+        max-width: 360px;
+        margin: 0 auto 24px;
+        text-align: center;
+
+        .field_label {
+          display: block;
+          font-weight: 600;
+          font-size: 14px;
+          margin-bottom: 8px;
+          color: #fff;
         }
       }
 

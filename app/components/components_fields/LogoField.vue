@@ -2,26 +2,16 @@
   <div class="logo_fields">
     <h4 class="centered">{{ $t("logo.title") }}</h4>
 
-    <!-- Upload Logo -->
-    <div class="input upload_logo">
-      <input
-        type="file"
-        accept="image/*"
-        id="logo_input"
-        hidden
-        @change="handleImageUpload"
+    <!-- Image Uploader with Drag & Drop, Preview, Replace, Delete, and Progress -->
+    <div class="logo_uploader_wrapper">
+      <ImageUploader
+        v-model="body.image"
+        :project-id="route.params.id"
+        :label="$t('logo.upload')"
+        :max-size-mb="5"
+        @deleted="body.image = null"
       />
-      <label for="logo_input" class="upload_logo_btn">
-        <i class="pi pi-upload"></i>
-        <span>{{ $t("logo.upload") }}</span>
-      </label>
     </div>
-
-    <!-- Preview -->
-    <label for="logo_input" v-if="body.image" class="preview">
-      <img :src="body.image" :alt="$t('logo.previewAlt')" loading="lazy" />
-      <!-- <button class="pi pi-trash delete_btn" @click="removeImage"></button> -->
-    </label>
 
     <!-- Width -->
     <div class="input">
@@ -57,9 +47,11 @@
 
 <script setup>
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
 
 const { t } = useI18n();
-const { submitMethod, submitResult, showErrorToast } = useApiMethods();
+const route = useRoute();
+const { showErrorToast } = useToastMsg();
 const emit = defineEmits(["handleSubmitFields", "handleCloseComponentPopup"]);
 
 const body = ref({
@@ -85,40 +77,6 @@ watch(
   { immediate: true },
 );
 
-// Image upload
-const handleImageUpload = (event) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  const allowedTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-    "image/svg+xml",
-  ];
-  if (!allowedTypes.includes(file.type)) {
-    showErrorToast(t("logo.invalidFile"));
-    event.target.value = "";
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  submitMethod("/uploads/single", true, formData, "POST");
-};
-
-watchEffect(() => {
-  if (submitResult?.value) {
-    body.value.image = submitResult.value.data?.path;
-  }
-});
-
-const removeImage = () => {
-  body.value.image = null;
-};
-
 // Submit
 const handleSubmitLogo = () => {
   if (!body.value.image) {
@@ -133,69 +91,40 @@ const handleSubmitLogo = () => {
 
 <style scoped lang="scss">
 .logo_fields {
+  .logo_uploader_wrapper {
+    margin-bottom: 16px;
+  }
+
   .input {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     gap: 30px;
+    margin-bottom: 12px;
 
     label {
       flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 500;
     }
 
     input {
-      border: 0.5px solid #e4e4e4;
+      border: 1px solid #e4e4e4;
+      border-radius: 6px;
       max-width: 150px;
       padding: 8px 10px;
+
+      &:focus {
+        border-color: #007593;
+        outline: none;
+      }
     }
   }
 
-  label.upload_logo_btn {
-    border: 1px dashed #e4e4e4;
-    border-radius: 6px;
-    padding: 12px;
-    cursor: pointer;
+  .main-btn {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    span {
-      margin-left: 8px;
-      font-size: 14px;
-    }
-    &:hover {
-      color: #f05d2a;
-      border-color: #f05d2a;
-    }
-  }
-
-  .preview {
-    margin-block: 10px;
-    position: relative;
-    max-width: 100px;
-    height: 100px;
-    border-radius: 4px;
-    overflow: hidden;
-    display: block;
-    cursor: pointer;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .delete_btn {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      font-size: 13px;
-      cursor: pointer;
-      border-radius: 4px;
-      background: rgba(0, 0, 0, 0.3);
-      color: #fff;
-    }
+    margin-top: 16px;
   }
 }
 </style>

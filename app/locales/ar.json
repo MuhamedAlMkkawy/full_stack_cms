@@ -19,10 +19,18 @@
     }
   },
   "auth_pages": {
+    "login_tab": "تسجيل الدخول",
+    "register_tab": "إنشاء حساب",
+    "forgot_tab": "استعادة",
+    "or": "أو المتابعة عبر",
     "login_subtitle": "سجّل الدخول بالبريد أو عبر Google",
     "login_link": "لديك حساب؟ تسجيل الدخول",
+    "have_account": "لديك حساب بالفعل؟",
+    "need_account": "ليس لديك حساب؟",
+    "register_action": "إنشاء حساب جديد",
+    "back_to_login": "العودة لتسجيل الدخول",
     "register_title": "إنشاء حساب",
-    "register_subtitle": "أنشئ حسابًا بالبريد أو تابع عبر Google",
+    "register_subtitle": "أنشئ حسابك وسجّل شركتك للانطلاق مباشرة",
     "register_link": "تحتاج حسابًا؟ إنشاء حساب",
     "register_submit": "إنشاء حساب",
     "forgot_title": "إعادة تعيين كلمة المرور",
@@ -30,7 +38,12 @@
     "forgot_link": "نسيت كلمة المرور؟",
     "forgot_submit": "إعادة تعيين كلمة المرور",
     "name": "الاسم",
-    "namePlaceholder": "اسمك",
+    "namePlaceholder": "اسمك الكامل",
+    "company_section": "بيانات الشركة",
+    "companyName": "اسم الشركة",
+    "companyNamePlaceholder": "مثال: شركة التقنية الحديثة",
+    "companySlug": "معرّف الشركة (Slug)",
+    "companySlugPlaceholder": "مثال: modern-tech",
     "confirmPassword": "تأكيد كلمة المرور",
     "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
     "newPassword": "كلمة المرور الجديدة",
@@ -39,6 +52,12 @@
     "validations": {
       "name": {
         "required": "الاسم مطلوب"
+      },
+      "companyName": {
+        "required": "اسم الشركة مطلوب"
+      },
+      "companySlug": {
+        "invalid": "المعرّف يقبل الأحرف الإنجليزية والأرقام والشرطة فقط"
       },
       "confirmPassword": {
         "required": "يرجى تأكيد كلمة المرور",
@@ -54,6 +73,33 @@
       "saved": "تم حفظ معرّف العميل. يمكنك المتابعة مع Google الآن.",
       "invalid": "أدخل معرّف عميل صالح ينتهي بـ .apps.googleusercontent.com"
     }
+  },
+  "imageUploader": {
+    "dragAndDrop": "اسحب وأفلت الصورة هنا،",
+    "orBrowse": "أو تصفح الملفات",
+    "supportedFormats": "يدعم JPG, PNG, WEBP, GIF, SVG",
+    "dropToReplace": "أفلت الصورة الجديدة للاستبدال",
+    "replace": "استبدال",
+    "delete": "حذف",
+    "view": "عرض",
+    "uploading": "جارٍ الرفع إلى Cloudinary...",
+    "uploadSuccess": "تم رفع الصورة بنجاح",
+    "uploadFailed": "فشل رفع الصورة",
+    "deleteSuccess": "تم حذف الصورة",
+    "imageLoadError": "تعذر تحميل معاينة الصورة"
+  },
+  "cloudinary": {
+    "configured": "تمت تهيئة Cloudinary",
+    "configure": "تهيئة Cloudinary",
+    "configurePrompt": "يرجى إدخال إعدادات Cloudinary لرفع الصور",
+    "help": "أدخل اسم السحابة (Cloud Name) واسم الإعداد المسبق غير الموقّع (Unsigned Preset). لا تدخل المفتاح السري أبدًا.",
+    "cloudNameLabel": "اسم السحابة (Cloud Name)",
+    "cloudNamePlaceholder": "مثال: my-cloud",
+    "presetLabel": "الإعداد المسبق غير الموقّع (Preset)",
+    "presetPlaceholder": "مثال: unsigned_preset",
+    "save": "حفظ الإعدادات",
+    "saved": "تم حفظ إعدادات Cloudinary بنجاح",
+    "missingFields": "يرجى إدخال اسم السحابة واسم الإعداد المسبق"
   },
   "home": {
     "welcome": "👋 أهلًا بك مجددًا، أيها المدير",

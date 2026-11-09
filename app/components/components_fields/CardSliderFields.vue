@@ -42,25 +42,13 @@
 
         <!-- IMAGE -->
         <div class="image_wrapper">
-          <input
-            type="file"
-            :id="`card_image_${index}`"
-            hidden
-            accept="image/*"
-            @change="handleCardImageUpload($event, index)"
+          <ImageUploader
+            v-model="item.file"
+            :project-id="route.params.id"
+            :compact="true"
+            :placeholder="$t('cardSlider.uploadImage')"
+            :max-size-mb="5"
           />
-          <label :for="`card_image_${index}`" class="upload_placeholder">
-            <template v-if="!item.file">
-              <i class="pi pi-upload"></i>
-              <span>{{ $t("cardSlider.uploadImage") }}</span>
-            </template>
-            <template v-else>
-              <img
-                :src="item.file"
-                loading="lazy"
-              />
-            </template>
-          </label>
         </div>
 
         <!-- TITLE INPUT -->
@@ -99,12 +87,11 @@
 
 <script setup>
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
 
 const { t } = useI18n();
-// -----------------------------
-// API & Toast
-// -----------------------------
-const { submitMethod, submitResult, showErrorToast } = useApiMethods();
+const route = useRoute();
+const { showErrorToast } = useToastMsg();
 
 // -----------------------------
 // EMITS
@@ -126,27 +113,6 @@ const slider = ref({
 const addNewCard = () =>
   slider.value.items.push({ file: null, title: "", text: "", link: "" });
 const removeItem = (index) => slider.value.items.splice(index, 1);
-
-// -----------------------------
-// IMAGE UPLOAD
-// -----------------------------
-const itemIndex = ref();
-
-const handleCardImageUpload = (event, index) => {
-  const file = event.target.files[0];
-  if (!file) return showErrorToast(t("cardSlider.errors.noFile"));
-
-  itemIndex.value = slider.value.items[index];
-
-  const formData = new FormData();
-  formData.append("file", file);
-
-  submitMethod("/uploads/single", true, formData, "POST", null);
-};
-
-watchEffect(() => {
-  if (submitResult?.value) itemIndex.value.file = submitResult.value.data.path;
-});
 
 // -----------------------------
 // HANDLE PROPS VALUES

@@ -10,6 +10,16 @@ export const useRegisterSchema = () => {
       .string()
       .required(t("login_page.validations.email.required"))
       .email(t("login_page.validations.email.invalid")),
+    companyName: yup
+      .string()
+      .required(t("auth_pages.validations.companyName.required")),
+    companySlug: yup
+      .string()
+      .matches(
+        /^[a-zA-Z0-9-]*$/,
+        t("auth_pages.validations.companySlug.invalid")
+      )
+      .nullable(),
     password: yup
       .string()
       .required(t("login_page.validations.password.required"))

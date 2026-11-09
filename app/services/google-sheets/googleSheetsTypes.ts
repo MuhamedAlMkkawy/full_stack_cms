@@ -112,7 +112,7 @@ export interface Asset extends SheetRow {
   mime_type: string;
   size: number;
   url: string;
-  storage_type: 'data_url' | 'drive' | 'external';
+  storage_type: 'data_url' | 'drive' | 'external' | 'cloudinary';
   created_at: string;
 }
 

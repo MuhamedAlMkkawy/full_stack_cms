@@ -57,14 +57,17 @@ export function useAuth() {
       // 2. Fetch or seed default organization
       const orgs = await organizationsRepository.getUserOrganizations(user.id);
       let role = 'admin';
+      let orgId = '';
       if (orgs.length > 0) {
         role = orgs[0].role;
+        orgId = orgs[0].organization.id;
       }
 
       currentUser.value = user;
       authStore.handleUserData({
         token: user.id,
         role: role,
+        organization_id: orgId,
         user: {
           id: user.id,
           email: user.email,
@@ -83,12 +86,14 @@ export function useAuth() {
   };
 
   /**
-   * Register a new user in the Google Sheets Users worksheet.
+   * Register a new user in the Google Sheets Users worksheet,
+   * with company details and an associated organization.
    */
   const registerWithCredentials = async (
     name: string,
     email: string,
-    password: string
+    password: string,
+    companyDetails?: { companyName?: string; companySlug?: string }
   ): Promise<boolean> => {
     loading.value = true;
     error.value = null;
@@ -102,6 +107,7 @@ export function useAuth() {
         return false;
       }
 
+      // 1. Create user with salted password hash
       const user = await usersRepository.createUserWithPassword(
         {
           email: email.trim().toLowerCase(),
@@ -111,10 +117,37 @@ export function useAuth() {
         password
       );
 
+      // 2. Create company/organization if details provided
+      let orgId = '';
+      const compName = companyDetails?.companyName?.trim() || `${user.name}'s Company`;
+      const compSlug =
+        companyDetails?.companySlug?.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-') ||
+        compName.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') ||
+        `org-${Date.now()}`;
+
+      try {
+        const organization = await organizationsRepository.create({
+          name: compName,
+          slug: compSlug,
+          logo_url: '',
+          plan: 'free',
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+        orgId = organization.id;
+
+        // 3. Add user as owner of the organization
+        await organizationsRepository.addMember(orgId, user.id, 'owner');
+      } catch (orgErr) {
+        console.warn('[useAuth] Could not register organization:', orgErr);
+      }
+
       currentUser.value = user;
       authStore.handleUserData({
         token: user.id,
-        role: 'admin',
+        role: 'owner',
+        organization_id: orgId,
         user: {
           id: user.id,
           email: user.email,

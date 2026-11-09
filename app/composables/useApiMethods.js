@@ -132,15 +132,33 @@ export function useApiMethods() {
       // 3. Handle File Upload (Asset)
       else if (cleanEndpoint.includes('uploads')) {
         let file = null;
+        let organizationId = '';
+        let projectId = '';
+
         if (payload instanceof FormData) {
           file = payload.get('file');
+          organizationId = payload.get('organization_id') || payload.get('organizationId') || '';
+          projectId = payload.get('project_id') || payload.get('projectId') || '';
         } else if (payload?.file) {
           file = payload.file;
+          organizationId = payload.organization_id || payload.organizationId || '';
+          projectId = payload.project_id || payload.projectId || '';
+        }
+
+        if (!projectId && router.currentRoute.value?.params?.id) {
+          projectId = String(router.currentRoute.value.params.id);
+        }
+        if (!organizationId && authStore.user?.organization_id) {
+          organizationId = String(authStore.user.organization_id);
         }
 
         if (file) {
-          const asset = await assetsRepository.uploadAsset(file);
-          resultData = { path: asset.url };
+          const asset = await assetsRepository.uploadAsset(file, {
+            organization_id: organizationId,
+            project_id: projectId,
+            filename: file.name || 'uploaded-image',
+          });
+          resultData = { path: asset.url, asset };
           successMessage = 'Uploaded successfully';
         } else {
           throw new Error('No file provided for upload');

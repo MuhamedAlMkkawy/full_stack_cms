@@ -19,10 +19,18 @@
     }
   },
   "auth_pages": {
+    "login_tab": "Sign In",
+    "register_tab": "Register",
+    "forgot_tab": "Reset",
+    "or": "Or continue with",
     "login_subtitle": "Sign in with email or Google",
     "login_link": "Already have an account? Sign in",
+    "have_account": "Already have an account?",
+    "need_account": "Don't have an account?",
+    "register_action": "Create an account",
+    "back_to_login": "Back to Sign In",
     "register_title": "Create account",
-    "register_subtitle": "Register with email or continue with Google",
+    "register_subtitle": "Register your account and company to get started",
     "register_link": "Need an account? Register",
     "register_submit": "Create account",
     "forgot_title": "Reset password",
@@ -31,6 +39,11 @@
     "forgot_submit": "Reset password",
     "name": "Name",
     "namePlaceholder": "Your name",
+    "company_section": "Company Information",
+    "companyName": "Company Name",
+    "companyNamePlaceholder": "e.g. Acme Corporation",
+    "companySlug": "Company Slug / Identifier",
+    "companySlugPlaceholder": "e.g. acme-corp",
     "confirmPassword": "Confirm password",
     "confirmPasswordPlaceholder": "Repeat your password",
     "newPassword": "New password",
@@ -39,6 +52,12 @@
     "validations": {
       "name": {
         "required": "Name is required"
+      },
+      "companyName": {
+        "required": "Company name is required"
+      },
+      "companySlug": {
+        "invalid": "Slug can only contain letters, numbers, and hyphens"
       },
       "confirmPassword": {
         "required": "Please confirm your password",
@@ -54,6 +73,33 @@
       "saved": "Google Client ID saved. You can continue with Google now.",
       "invalid": "Enter a valid Client ID ending with .apps.googleusercontent.com"
     }
+  },
+  "imageUploader": {
+    "dragAndDrop": "Drag and drop image here,",
+    "orBrowse": "or browse",
+    "supportedFormats": "Supports JPG, PNG, WEBP, GIF, SVG",
+    "dropToReplace": "Drop new image to replace",
+    "replace": "Replace",
+    "delete": "Delete",
+    "view": "View",
+    "uploading": "Uploading to Cloudinary...",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadFailed": "Failed to upload image",
+    "deleteSuccess": "Image removed",
+    "imageLoadError": "Failed to load image preview"
+  },
+  "cloudinary": {
+    "configured": "Cloudinary Configured",
+    "configure": "Configure Cloudinary",
+    "configurePrompt": "Please configure Cloudinary settings to upload images",
+    "help": "Enter your Cloudinary Cloud Name and an Unsigned Upload Preset. Never enter your API Secret.",
+    "cloudNameLabel": "Cloud Name",
+    "cloudNamePlaceholder": "e.g. my-cloud-name",
+    "presetLabel": "Unsigned Upload Preset",
+    "presetPlaceholder": "e.g. unsigned_preset",
+    "save": "Save Settings",
+    "saved": "Cloudinary settings saved successfully",
+    "missingFields": "Please provide both Cloud Name and Upload Preset"
   },
   "home": {
     "welcome": "👋 Welcome back, Manager",
