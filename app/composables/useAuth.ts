@@ -22,19 +22,17 @@ export function useAuth() {
   };
 
   /**
-   * Log in using email and password against the Google Sheets Users table.
+   * Log in using email and password against the Users table.
+   * Completely separated from Google OAuth.
    */
   const loginWithCredentials = async (email: string, password: string): Promise<boolean> => {
     loading.value = true;
     error.value = null;
     try {
-      requireGoogleClientId();
-      await googleSheetsAuth.requestAccessToken(false);
-
-      // 1. Verify user in Google Sheets Users worksheet
+      // 1. Verify user in Users repository
       let user = await usersRepository.verifyCredentials(email, password);
 
-      // If no users exist in the sheet yet, auto-seed the first admin user
+      // If no users exist yet, auto-seed the first admin user
       if (!user) {
         const allUsers = await usersRepository.findAll();
         if (allUsers.length === 0) {
@@ -86,8 +84,8 @@ export function useAuth() {
   };
 
   /**
-   * Register a new user in the Google Sheets Users worksheet,
-   * with company details and an associated organization.
+   * Register a new user with company details and associated organization.
+   * Completely separated from Google OAuth.
    */
   const registerWithCredentials = async (
     name: string,
@@ -98,9 +96,6 @@ export function useAuth() {
     loading.value = true;
     error.value = null;
     try {
-      requireGoogleClientId();
-      await googleSheetsAuth.requestAccessToken(false);
-
       const existing = await usersRepository.findByEmail(email);
       if (existing) {
         error.value = 'An account with this email already exists';
@@ -168,9 +163,6 @@ export function useAuth() {
     loading.value = true;
     error.value = null;
     try {
-      requireGoogleClientId();
-      await googleSheetsAuth.requestAccessToken(false);
-
       const updated = await usersRepository.updatePassword(email, newPassword);
       if (!updated) {
         error.value = 'No account found for this email';

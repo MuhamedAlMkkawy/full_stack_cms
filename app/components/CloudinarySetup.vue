@@ -119,12 +119,12 @@ const testConnection = async () => {
   statusMsg.value = "";
   isError.value = false;
 
-  const cloud = cloudNameInput.value.trim();
-  const preset = presetInput.value.trim();
+  const cloud = (cloudNameInput.value || cloudinaryService.getCloudName()).trim();
+  const preset = (presetInput.value || cloudinaryService.getUploadPreset()).trim();
 
-  if (!cloud || !preset) {
+  if (!cloud) {
     isError.value = true;
-    statusMsg.value = t("cloudinary.missingFields");
+    statusMsg.value = t("cloudinary.missingFields") || "Please enter a valid Cloud Name";
     showErrorToast(statusMsg.value);
     return;
   }

@@ -35,20 +35,24 @@ export class CloudinaryService {
   public getCloudName(): string {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY_CLOUD_NAME);
-      if (saved && saved.trim()) return saved.trim();
+      if (saved && saved.trim() && saved.trim() !== 'apper_files') return saved.trim();
+      // If erroneous 'apper_files' was stored, clean it up
+      if (saved === 'apper_files') {
+        localStorage.removeItem(STORAGE_KEY_CLOUD_NAME);
+      }
     }
 
     try {
       const config = useRuntimeConfig();
       const fromConfig = config.public?.cloudinaryCloudName as string | undefined;
-      if (fromConfig && fromConfig.trim()) {
+      if (fromConfig && fromConfig.trim() && fromConfig.trim() !== 'apper_files') {
         return fromConfig.trim();
       }
     } catch {
       // RuntimeConfig not available in this context
     }
 
-    return '';
+    return 'pg2ruop3';
   }
 
   /**
@@ -61,25 +65,28 @@ export class CloudinaryService {
   }
 
   /**
-   * Get the active Cloudinary unsigned upload preset from localStorage or runtimeConfig.
+   * Get the active Cloudinary upload preset from localStorage or runtimeConfig.
    */
   public getUploadPreset(): string {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEY_UPLOAD_PRESET);
-      if (saved && saved.trim()) return saved.trim();
+      if (saved && saved.trim() && saved.trim() !== 'apper_files') return saved.trim();
+      if (saved === 'apper_files') {
+        localStorage.removeItem(STORAGE_KEY_UPLOAD_PRESET);
+      }
     }
 
     try {
       const config = useRuntimeConfig();
       const fromConfig = config.public?.cloudinaryUploadPreset as string | undefined;
-      if (fromConfig && fromConfig.trim()) {
+      if (fromConfig && fromConfig.trim() && fromConfig.trim() !== 'apper_files') {
         return fromConfig.trim();
       }
     } catch {
       // RuntimeConfig not available in this context
     }
 
-    return '';
+    return 'appy_files';
   }
 
   /**
@@ -95,7 +102,7 @@ export class CloudinaryService {
    * Check whether Cloudinary has both cloudName and uploadPreset configured.
    */
   public isConfigured(): boolean {
-    return Boolean(this.getCloudName() && this.getUploadPreset());
+    return Boolean(this.getCloudName());
   }
 
   /**
@@ -135,36 +142,66 @@ export class CloudinaryService {
 
   /**
    * Attempt to upload via server-side signed route (/api/upload).
+   * Supports progress monitoring via XMLHttpRequest.
    */
-  public async uploadViaServer(
+  public uploadViaServer(
     file: File,
-    options?: { folder?: string }
+    options?: { folder?: string; onProgress?: (percent: number) => void }
   ): Promise<CloudinaryUploadResult> {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (options?.folder) {
-      formData.append('folder', options.folder);
-    }
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (options?.folder) {
+        formData.append('folder', options.folder);
+      }
 
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload');
+
+      if (options?.onProgress) {
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.min(100, Math.round((event.loaded / event.total) * 100));
+            options.onProgress?.(percent);
+          }
+        };
+      }
+
+      xhr.onload = () => {
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve({
+              secure_url: res.secure_url || res.url,
+              url: res.url || res.secure_url,
+              public_id: res.public_id,
+              format: res.format,
+              width: res.width,
+              height: res.height,
+              bytes: res.bytes,
+              original_filename: res.original_filename || file.name,
+              created_at: res.created_at || new Date().toISOString(),
+            });
+          } else {
+            reject(new Error(res?.statusMessage || res?.message || `Server upload failed (${xhr.status})`));
+          }
+        } catch {
+          reject(new Error(`Server upload response parse error (HTTP ${xhr.status})`));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('Network error during upload to /api/upload'));
+      xhr.send(formData);
     });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData?.statusMessage || errData?.message || 'Server upload failed');
-    }
-
-    return await response.json();
   }
 
   /**
-   * Upload an image file directly to Cloudinary using an unsigned upload preset.
-   * If unsigned upload fails, automatically falls back to server-side signed upload if configured.
+   * Upload an image file to Cloudinary.
+   * Prioritizes secure server-side signed upload (/api/upload) using configured API Key & Secret.
+   * If server upload is not available, falls back to direct client-side upload.
    * Tracks upload progress and returns the secure URL and image metadata.
    */
-  public uploadImage(
+  public async uploadImage(
     file: File,
     options?: {
       folder?: string;
@@ -174,42 +211,39 @@ export class CloudinaryService {
       uploadPreset?: string;
     }
   ): Promise<CloudinaryUploadResult> {
+    // 1. Validate file
+    const validation = this.validateImage(file, options?.maxSizeMb || 5);
+    if (!validation.valid) {
+      throw new Error(validation.error);
+    }
+
+    // 2. Prioritize trusted server-side signed upload
+    try {
+      const serverResult = await this.uploadViaServer(file, options);
+      return serverResult;
+    } catch (serverErr: any) {
+      console.warn('[CloudinaryService] Server upload failed, attempting direct upload fallback:', serverErr?.message);
+    }
+
+    // 3. Fallback: Direct client-side unsigned upload
+    const cloudName = options?.cloudName || this.getCloudName();
+    const uploadPreset = options?.uploadPreset || this.getUploadPreset();
+
+    if (!cloudName) {
+      throw new Error('Cloudinary Cloud Name is not configured.');
+    }
+
     return new Promise((resolve, reject) => {
-      // 1. Validate file
-      const validation = this.validateImage(file, options?.maxSizeMb || 5);
-      if (!validation.valid) {
-        return reject(new Error(validation.error));
-      }
-
-      // 2. Validate configuration
-      const cloudName = options?.cloudName || this.getCloudName();
-      const uploadPreset = options?.uploadPreset || this.getUploadPreset();
-
-      if (!cloudName || !uploadPreset) {
-        // Try server-side route before failing
-        this.uploadViaServer(file, options)
-          .then((res) => resolve(res))
-          .catch(() => {
-            reject(
-              new Error(
-                'Cloudinary is not configured. Please provide your Cloud Name and Unsigned Upload Preset in settings.'
-              )
-            );
-          });
-        return;
-      }
-
-      // 3. Prepare payload for unsigned upload
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', uploadPreset);
+      if (uploadPreset) {
+        formData.append('upload_preset', uploadPreset);
+      }
       if (options?.folder) {
         formData.append('folder', options.folder);
       }
 
       const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`;
-
-      // 4. Perform upload with XMLHttpRequest to monitor upload progress
       const xhr = new XMLHttpRequest();
       xhr.open('POST', endpoint);
 
@@ -238,39 +272,18 @@ export class CloudinaryService {
               created_at: response.created_at || new Date().toISOString(),
             });
           } else {
-            let errorMsg =
+            const errorMsg =
               response.error?.message ||
               `Cloudinary upload failed with status ${xhr.status}`;
-
-            // Try fallback to server-side signed upload if available
-            this.uploadViaServer(file, options)
-              .then((serverRes) => resolve(serverRes))
-              .catch(() => {
-                // Specific actionable guidance for "Unknown API key" error:
-                if (errorMsg.toLowerCase().includes('unknown api key')) {
-                  errorMsg = `Cloudinary Error: The upload preset "${uploadPreset}" is either set to "Signed" mode or does not exist under Cloud Name "${cloudName}". In Cloudinary Console -> Settings -> Upload -> Upload presets, edit "${uploadPreset}" and change Signing Mode to "Unsigned".`;
-                }
-                reject(new Error(errorMsg));
-              });
+            reject(new Error(errorMsg));
           }
         } catch {
-          this.uploadViaServer(file, options)
-            .then((serverRes) => resolve(serverRes))
-            .catch((serverErr) => {
-              reject(new Error(`Failed to parse Cloudinary response (HTTP ${xhr.status}): ${xhr.responseText || xhr.statusText}`));
-            });
+          reject(new Error(`Failed to parse Cloudinary response (HTTP ${xhr.status})`));
         }
       };
 
       xhr.onerror = () => {
-        // Try fallback to server upload
-        this.uploadViaServer(file, options)
-          .then((serverRes) => resolve(serverRes))
-          .catch(() => {
-            reject(
-              new Error('Network error occurred while uploading to Cloudinary. Check your internet connection or CORS settings.')
-            );
-          });
+        reject(new Error('Network error occurred while uploading to Cloudinary.'));
       };
 
       xhr.ontimeout = () => {

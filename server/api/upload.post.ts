@@ -8,17 +8,17 @@ export default defineEventHandler(async (event) => {
     process.env.CLOUDINARY_CLOUD_NAME ||
     process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
     (config.public?.cloudinaryCloudName as string) ||
-    '';
+    'pg2ruop3';
 
   const apiKey =
     process.env.CLOUDINARY_API_KEY ||
     (config.cloudinaryApiKey as string) ||
-    '';
+    '618617527253867';
 
   const apiSecret =
     process.env.CLOUDINARY_API_SECRET ||
     (config.cloudinaryApiSecret as string) ||
-    '';
+    'haDjVa2VdLTqSI_Ja8iATjWsID0';
 
   // Read multipart form data from request
   const formData = await readMultipartFormData(event);

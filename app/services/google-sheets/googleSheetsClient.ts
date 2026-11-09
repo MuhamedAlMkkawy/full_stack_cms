@@ -56,6 +56,38 @@ export class GoogleSheetsClient {
   }
 
   /**
+   * Check whether Google OAuth is authenticated and has an unexpired token.
+   */
+  public hasGoogleAuth(): boolean {
+    return Boolean(googleSheetsAuth.getValidAccessToken());
+  }
+
+  /**
+   * Retrieve fallback rows from browser local storage.
+   */
+  private getLocalRows<T extends SheetRow>(sheetName: string): T[] {
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem(`cms_data_${sheetName}`);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Save fallback rows to browser local storage.
+   */
+  private saveLocalRows<T extends SheetRow>(sheetName: string, rows: T[]): void {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(`cms_data_${sheetName}`, JSON.stringify(rows));
+    } catch (e) {
+      console.warn(`[GoogleSheetsClient] Failed to save local rows for ${sheetName}:`, e);
+    }
+  }
+
+  /**
    * Get valid Authorization header for Google Sheets API requests.
    */
   private async getAuthHeaders(): Promise<Record<string, string>> {
@@ -212,44 +244,59 @@ export class GoogleSheetsClient {
 
   /**
    * Fetch all rows from a worksheet as strongly-typed objects.
+   * If Google OAuth is connected, fetches from Google Sheets and mirrors locally.
+   * Otherwise, seamlessly returns locally stored rows.
    */
   public async getRows<T extends SheetRow>(sheetName: WorksheetName, options?: QueryOptions): Promise<T[]> {
-    // Check in-memory cache
+    // 1. Check in-memory cache
     const cached = this.rowsCache.get(sheetName);
     const now = Date.now();
     if (cached && (now - cached.timestamp < this.cacheTTLMs)) {
       return this.applyQueryOptions(cached.data as T[], options);
     }
 
-    await this.ensureWorksheet(sheetName);
-    const headers = await this.getHeaders(sheetName);
-    const authHeaders = await this.getAuthHeaders();
-    const range = `'${sheetName}'!A2:${columnToLetter(headers.length - 1)}`;
+    // 2. If authenticated with Google, query Google Sheets
+    if (this.hasGoogleAuth()) {
+      try {
+        await this.ensureWorksheet(sheetName);
+        const headers = await this.getHeaders(sheetName);
+        const authHeaders = await this.getAuthHeaders();
+        const range = `'${sheetName}'!A2:${columnToLetter(headers.length - 1)}`;
 
-    const res = await withRetry(async () => {
-      const response = await fetch(
-        `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(range)}`,
-        { headers: authHeaders }
-      );
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`[GoogleSheets] Failed to fetch rows from "${sheetName}": ${err}`);
+        const res = await withRetry(async () => {
+          const response = await fetch(
+            `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(range)}`,
+            { headers: authHeaders }
+          );
+          if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`[GoogleSheets] Failed to fetch rows from "${sheetName}": ${err}`);
+          }
+          return response.json();
+        });
+
+        const rawRows: any[][] = res.values || [];
+        const typedRows: T[] = [];
+
+        for (let i = 0; i < rawRows.length; i++) {
+          const row = rawRows[i];
+          if (!row || !row[0]) continue; // Skip empty rows or rows without ID
+          const item = rowToObject<T>(headers, row);
+          typedRows.push(item);
+        }
+
+        this.rowsCache.set(sheetName, { timestamp: now, data: typedRows });
+        this.saveLocalRows(sheetName, typedRows);
+        return this.applyQueryOptions(typedRows, options);
+      } catch (err) {
+        console.warn(`[GoogleSheets] Falling back to local storage for "${sheetName}":`, err);
       }
-      return response.json();
-    });
-
-    const rawRows: any[][] = res.values || [];
-    const typedRows: T[] = [];
-
-    for (let i = 0; i < rawRows.length; i++) {
-      const row = rawRows[i];
-      if (!row || !row[0]) continue; // Skip empty rows or rows without ID
-      const item = rowToObject<T>(headers, row);
-      typedRows.push(item);
     }
 
-    this.rowsCache.set(sheetName, { timestamp: now, data: typedRows });
-    return this.applyQueryOptions(typedRows, options);
+    // 3. Fallback: Local persistent storage (separated from Google OAuth)
+    const localRows = this.getLocalRows<T>(sheetName);
+    this.rowsCache.set(sheetName, { timestamp: now, data: localRows });
+    return this.applyQueryOptions(localRows, options);
   }
 
   /**
@@ -276,10 +323,6 @@ export class GoogleSheetsClient {
    * Create a single new row in the worksheet.
    */
   public async createRow<T extends SheetRow>(sheetName: WorksheetName, data: Partial<T>): Promise<T> {
-    await this.ensureWorksheet(sheetName);
-    const headers = await this.getHeaders(sheetName);
-    const authHeaders = await this.getAuthHeaders();
-
     const now = new Date().toISOString();
     const newRecord: Record<string, any> = {
       id: data.id || generateUUID(),
@@ -288,30 +331,44 @@ export class GoogleSheetsClient {
       ...data,
     };
 
-    const rowValues = objectToRow(headers, newRecord);
-    const range = `'${sheetName}'!A:${columnToLetter(headers.length - 1)}`;
+    if (this.hasGoogleAuth()) {
+      try {
+        await this.ensureWorksheet(sheetName);
+        const headers = await this.getHeaders(sheetName);
+        const authHeaders = await this.getAuthHeaders();
+        const rowValues = objectToRow(headers, newRecord);
+        const range = `'${sheetName}'!A:${columnToLetter(headers.length - 1)}`;
 
-    await withRetry(async () => {
-      const response = await fetch(
-        `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-        {
-          method: 'POST',
-          headers: authHeaders,
-          body: JSON.stringify({
-            range,
-            majorDimension: 'ROWS',
-            values: [rowValues],
-          }),
-        }
-      );
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`[GoogleSheets] Failed to create row in "${sheetName}": ${err}`);
+        await withRetry(async () => {
+          const response = await fetch(
+            `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+            {
+              method: 'POST',
+              headers: authHeaders,
+              body: JSON.stringify({
+                range,
+                majorDimension: 'ROWS',
+                values: [rowValues],
+              }),
+            }
+          );
+          if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`[GoogleSheets] Failed to create row in "${sheetName}": ${err}`);
+          }
+          return response.json();
+        });
+      } catch (err) {
+        console.warn(`[GoogleSheets] Append to Google Sheet failed, keeping in local storage:`, err);
       }
-      return response.json();
-    });
+    }
 
+    // Always keep local storage updated
+    const currentLocal = this.getLocalRows<T>(sheetName);
+    currentLocal.push(newRecord as T);
+    this.saveLocalRows(sheetName, currentLocal);
     this.invalidateCache(sheetName);
+
     return newRecord as T;
   }
 
@@ -323,128 +380,160 @@ export class GoogleSheetsClient {
     id: string,
     partialData: Partial<T>
   ): Promise<T> {
-    await this.ensureWorksheet(sheetName);
-    const headers = await this.getHeaders(sheetName);
-    const authHeaders = await this.getAuthHeaders();
+    const now = new Date().toISOString();
 
-    // 1. Locate existing row index by fetching column A (IDs)
-    const idRange = `'${sheetName}'!A2:A`;
-    const idRes = await withRetry(async () => {
-      const response = await fetch(
-        `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(idRange)}`,
-        { headers: authHeaders }
-      );
-      if (!response.ok) {
-        throw new Error(`[GoogleSheets] Failed to search row ID in "${sheetName}"`);
-      }
-      return response.json();
-    });
+    if (this.hasGoogleAuth()) {
+      try {
+        await this.ensureWorksheet(sheetName);
+        const headers = await this.getHeaders(sheetName);
+        const authHeaders = await this.getAuthHeaders();
 
-    const ids: any[][] = idRes.values || [];
-    const rowIndex = ids.findIndex((r) => r[0] === id);
-    if (rowIndex === -1) {
-      throw new Error(`[GoogleSheets] Row with ID "${id}" not found in sheet "${sheetName}".`);
-    }
+        // 1. Locate existing row index by fetching column A (IDs)
+        const idRange = `'${sheetName}'!A2:A`;
+        const idRes = await withRetry(async () => {
+          const response = await fetch(
+            `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(idRange)}`,
+            { headers: authHeaders }
+          );
+          if (!response.ok) {
+            throw new Error(`[GoogleSheets] Failed to search row ID in "${sheetName}"`);
+          }
+          return response.json();
+        });
 
-    const actualRowNumber = rowIndex + 2; // +2 accounts for 1-based index and header row
+        const ids: any[][] = idRes.values || [];
+        const rowIndex = ids.findIndex((r) => r[0] === id);
+        if (rowIndex !== -1) {
+          const actualRowNumber = rowIndex + 2;
 
-    // 2. Fetch existing row to merge data
-    const existing = await this.getRowById<T>(sheetName, id);
-    if (!existing) {
-      throw new Error(`[GoogleSheets] Row "${id}" data unavailable.`);
-    }
+          // 2. Fetch existing row to merge data
+          const existing = await this.getRowById<T>(sheetName, id);
+          const updatedRecord: Record<string, any> = {
+            ...(existing || {}),
+            ...partialData,
+            id,
+            updated_at: now,
+          };
 
-    const updatedRecord: Record<string, any> = {
-      ...existing,
-      ...partialData,
-      id,
-      updated_at: new Date().toISOString(),
-    };
+          const rowValues = objectToRow(headers, updatedRecord);
+          const targetRange = `'${sheetName}'!A${actualRowNumber}:${columnToLetter(headers.length - 1)}${actualRowNumber}`;
 
-    const rowValues = objectToRow(headers, updatedRecord);
-    const targetRange = `'${sheetName}'!A${actualRowNumber}:${columnToLetter(headers.length - 1)}${actualRowNumber}`;
-
-    await withRetry(async () => {
-      const response = await fetch(
-        `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(targetRange)}?valueInputOption=USER_ENTERED`,
-        {
-          method: 'PUT',
-          headers: authHeaders,
-          body: JSON.stringify({
-            range: targetRange,
-            majorDimension: 'ROWS',
-            values: [rowValues],
-          }),
+          await withRetry(async () => {
+            const response = await fetch(
+              `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(targetRange)}?valueInputOption=USER_ENTERED`,
+              {
+                method: 'PUT',
+                headers: authHeaders,
+                body: JSON.stringify({
+                  range: targetRange,
+                  majorDimension: 'ROWS',
+                  values: [rowValues],
+                }),
+              }
+            );
+            if (!response.ok) {
+              const err = await response.text();
+              throw new Error(`[GoogleSheets] Failed to update row "${id}" in "${sheetName}": ${err}`);
+            }
+            return response.json();
+          });
         }
-      );
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`[GoogleSheets] Failed to update row "${id}" in "${sheetName}": ${err}`);
+      } catch (err) {
+        console.warn(`[GoogleSheets] Update in Google Sheet failed, updating locally:`, err);
       }
-      return response.json();
-    });
+    }
 
+    // Always update local storage
+    const currentLocal = this.getLocalRows<T>(sheetName);
+    const index = currentLocal.findIndex((r) => r.id === id);
+    let updatedItem: T;
+    if (index !== -1) {
+      updatedItem = {
+        ...currentLocal[index],
+        ...partialData,
+        id,
+        updated_at: now,
+      };
+      currentLocal[index] = updatedItem;
+    } else {
+      updatedItem = {
+        ...partialData,
+        id,
+        created_at: now,
+        updated_at: now,
+      } as T;
+      currentLocal.push(updatedItem);
+    }
+
+    this.saveLocalRows(sheetName, currentLocal);
     this.invalidateCache(sheetName);
-    return updatedRecord as T;
+    return updatedItem;
   }
 
   /**
    * Delete a row by its UUID id (clears the row values or deletes the row dimension).
    */
   public async deleteRow(sheetName: WorksheetName, id: string): Promise<boolean> {
-    const metadata = await this.ensureWorksheet(sheetName);
-    const authHeaders = await this.getAuthHeaders();
+    if (this.hasGoogleAuth()) {
+      try {
+        const metadata = await this.ensureWorksheet(sheetName);
+        const authHeaders = await this.getAuthHeaders();
 
-    // 1. Locate row index
-    const idRange = `'${sheetName}'!A2:A`;
-    const idRes = await withRetry(async () => {
-      const response = await fetch(
-        `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(idRange)}`,
-        { headers: authHeaders }
-      );
-      if (!response.ok) {
-        throw new Error(`[GoogleSheets] Failed to search row ID in "${sheetName}"`);
+        // 1. Locate row index
+        const idRange = `'${sheetName}'!A2:A`;
+        const idRes = await withRetry(async () => {
+          const response = await fetch(
+            `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(idRange)}`,
+            { headers: authHeaders }
+          );
+          if (!response.ok) {
+            throw new Error(`[GoogleSheets] Failed to search row ID in "${sheetName}"`);
+          }
+          return response.json();
+        });
+
+        const ids: any[][] = idRes.values || [];
+        const rowIndex = ids.findIndex((r) => r[0] === id);
+        if (rowIndex !== -1) {
+          const startRowIndex = rowIndex + 1; // 0-based index for batchUpdate where 0 is header row
+
+          const deleteRequestBody = {
+            requests: [
+              {
+                deleteDimension: {
+                  range: {
+                    sheetId: metadata.sheetId,
+                    dimension: 'ROWS',
+                    startIndex: startRowIndex,
+                    endIndex: startRowIndex + 1,
+                  },
+                },
+              },
+            ],
+          };
+
+          await withRetry(async () => {
+            const response = await fetch(`${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}:batchUpdate`, {
+              method: 'POST',
+              headers: authHeaders,
+              body: JSON.stringify(deleteRequestBody),
+            });
+            if (!response.ok) {
+              const err = await response.text();
+              throw new Error(`[GoogleSheets] Failed to delete row "${id}" in "${sheetName}": ${err}`);
+            }
+            return response.json();
+          });
+        }
+      } catch (err) {
+        console.warn(`[GoogleSheets] Delete in Google Sheet failed, deleting locally:`, err);
       }
-      return response.json();
-    });
-
-    const ids: any[][] = idRes.values || [];
-    const rowIndex = ids.findIndex((r) => r[0] === id);
-    if (rowIndex === -1) {
-      return false; // Row doesn't exist
     }
 
-    const startRowIndex = rowIndex + 1; // 0-based index for batchUpdate where 0 is header row
-
-    // 2. Delete row dimension
-    const deleteRequestBody = {
-      requests: [
-        {
-          deleteDimension: {
-            range: {
-              sheetId: metadata.sheetId,
-              dimension: 'ROWS',
-              startIndex: startRowIndex,
-              endIndex: startRowIndex + 1,
-            },
-          },
-        },
-      ],
-    };
-
-    await withRetry(async () => {
-      const response = await fetch(`${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}:batchUpdate`, {
-        method: 'POST',
-        headers: authHeaders,
-        body: JSON.stringify(deleteRequestBody),
-      });
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`[GoogleSheets] Failed to delete row "${id}" in "${sheetName}": ${err}`);
-      }
-      return response.json();
-    });
-
+    // Always update local storage
+    const currentLocal = this.getLocalRows(sheetName);
+    const filtered = currentLocal.filter((r) => r.id !== id);
+    this.saveLocalRows(sheetName, filtered);
     this.invalidateCache(sheetName);
     return true;
   }
@@ -454,10 +543,6 @@ export class GoogleSheetsClient {
    */
   public async batchCreate<T extends SheetRow>(sheetName: WorksheetName, items: Partial<T>[]): Promise<T[]> {
     if (!items.length) return [];
-    await this.ensureWorksheet(sheetName);
-    const headers = await this.getHeaders(sheetName);
-    const authHeaders = await this.getAuthHeaders();
-
     const now = new Date().toISOString();
     const preparedRecords = items.map((data) => ({
       id: data.id || generateUUID(),
@@ -466,30 +551,44 @@ export class GoogleSheetsClient {
       ...data,
     }));
 
-    const rowsValues = preparedRecords.map((rec) => objectToRow(headers, rec));
-    const range = `'${sheetName}'!A:${columnToLetter(headers.length - 1)}`;
+    if (this.hasGoogleAuth()) {
+      try {
+        await this.ensureWorksheet(sheetName);
+        const headers = await this.getHeaders(sheetName);
+        const authHeaders = await this.getAuthHeaders();
+        const rowsValues = preparedRecords.map((rec) => objectToRow(headers, rec));
+        const range = `'${sheetName}'!A:${columnToLetter(headers.length - 1)}`;
 
-    await withRetry(async () => {
-      const response = await fetch(
-        `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-        {
-          method: 'POST',
-          headers: authHeaders,
-          body: JSON.stringify({
-            range,
-            majorDimension: 'ROWS',
-            values: rowsValues,
-          }),
-        }
-      );
-      if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`[GoogleSheets] Failed to batch create rows in "${sheetName}": ${err}`);
+        await withRetry(async () => {
+          const response = await fetch(
+            `${GOOGLE_SHEETS_API_BASE}/${this.spreadsheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+            {
+              method: 'POST',
+              headers: authHeaders,
+              body: JSON.stringify({
+                range,
+                majorDimension: 'ROWS',
+                values: rowsValues,
+              }),
+            }
+          );
+          if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`[GoogleSheets] Failed to batch create rows in "${sheetName}": ${err}`);
+          }
+          return response.json();
+        });
+      } catch (err) {
+        console.warn(`[GoogleSheets] Batch create in Google Sheet failed, keeping in local storage:`, err);
       }
-      return response.json();
-    });
+    }
 
+    // Always update local storage
+    const currentLocal = this.getLocalRows<T>(sheetName);
+    currentLocal.push(...(preparedRecords as T[]));
+    this.saveLocalRows(sheetName, currentLocal);
     this.invalidateCache(sheetName);
+
     return preparedRecords as T[];
   }
 
