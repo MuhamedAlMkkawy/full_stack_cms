@@ -6,11 +6,13 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
 
   runtimeConfig: {
+    cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || "",
+    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || "",
     public: {
       apiBase: "https://sheets.googleapis.com/v4/spreadsheets/",
       googleSpreadsheetId: "1lMK248oPi3NxFSLyZbk-y09UEcwFMep5fnGhkFBDl4M",
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || "",
-      cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "",
+      cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || "",
       cloudinaryUploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "",
     },
   },

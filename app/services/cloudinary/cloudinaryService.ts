@@ -134,9 +134,35 @@ export class CloudinaryService {
   }
 
   /**
+   * Attempt to upload via server-side signed route (/api/upload).
+   */
+  public async uploadViaServer(
+    file: File,
+    options?: { folder?: string }
+  ): Promise<CloudinaryUploadResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (options?.folder) {
+      formData.append('folder', options.folder);
+    }
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData?.statusMessage || errData?.message || 'Server upload failed');
+    }
+
+    return await response.json();
+  }
+
+  /**
    * Upload an image file directly to Cloudinary using an unsigned upload preset.
+   * If unsigned upload fails, automatically falls back to server-side signed upload if configured.
    * Tracks upload progress and returns the secure URL and image metadata.
-   * NEVER exposes API secrets in browser code.
    */
   public uploadImage(
     file: File,
@@ -160,11 +186,17 @@ export class CloudinaryService {
       const uploadPreset = options?.uploadPreset || this.getUploadPreset();
 
       if (!cloudName || !uploadPreset) {
-        return reject(
-          new Error(
-            'Cloudinary is not configured. Please provide your Cloud Name and Unsigned Upload Preset in settings.'
-          )
-        );
+        // Try server-side route before failing
+        this.uploadViaServer(file, options)
+          .then((res) => resolve(res))
+          .catch(() => {
+            reject(
+              new Error(
+                'Cloudinary is not configured. Please provide your Cloud Name and Unsigned Upload Preset in settings.'
+              )
+            );
+          });
+        return;
       }
 
       // 3. Prepare payload for unsigned upload
@@ -210,22 +242,35 @@ export class CloudinaryService {
               response.error?.message ||
               `Cloudinary upload failed with status ${xhr.status}`;
 
-            // Specific actionable guidance for "Unknown API key" error:
-            if (errorMsg.toLowerCase().includes('unknown api key')) {
-              errorMsg = `Cloudinary Error: The upload preset "${uploadPreset}" is either set to "Signed" mode or does not exist under Cloud Name "${cloudName}". In Cloudinary Console -> Settings -> Upload -> Upload presets, edit "${uploadPreset}" and change Signing Mode to "Unsigned".`;
-            }
-
-            reject(new Error(errorMsg));
+            // Try fallback to server-side signed upload if available
+            this.uploadViaServer(file, options)
+              .then((serverRes) => resolve(serverRes))
+              .catch(() => {
+                // Specific actionable guidance for "Unknown API key" error:
+                if (errorMsg.toLowerCase().includes('unknown api key')) {
+                  errorMsg = `Cloudinary Error: The upload preset "${uploadPreset}" is either set to "Signed" mode or does not exist under Cloud Name "${cloudName}". In Cloudinary Console -> Settings -> Upload -> Upload presets, edit "${uploadPreset}" and change Signing Mode to "Unsigned".`;
+                }
+                reject(new Error(errorMsg));
+              });
           }
         } catch {
-          reject(new Error(`Failed to parse Cloudinary response (HTTP ${xhr.status}): ${xhr.responseText || xhr.statusText}`));
+          this.uploadViaServer(file, options)
+            .then((serverRes) => resolve(serverRes))
+            .catch((serverErr) => {
+              reject(new Error(`Failed to parse Cloudinary response (HTTP ${xhr.status}): ${xhr.responseText || xhr.statusText}`));
+            });
         }
       };
 
       xhr.onerror = () => {
-        reject(
-          new Error('Network error occurred while uploading to Cloudinary. Check your internet connection or CORS settings.')
-        );
+        // Try fallback to server upload
+        this.uploadViaServer(file, options)
+          .then((serverRes) => resolve(serverRes))
+          .catch(() => {
+            reject(
+              new Error('Network error occurred while uploading to Cloudinary. Check your internet connection or CORS settings.')
+            );
+          });
       };
 
       xhr.ontimeout = () => {
@@ -261,7 +306,7 @@ export class CloudinaryService {
 
       return {
         success: true,
-        message: 'Cloudinary configuration is valid! Unsigned upload succeeded.',
+        message: 'Cloudinary configuration is valid! Upload succeeded.',
         url: result.secure_url,
       };
     } catch (err: any) {
