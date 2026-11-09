@@ -72,6 +72,35 @@
       </a>
     </div>
 
+    <!-- Card Slider -->
+    <div v-else-if="component.type === 'card-slider'" class="component_card_slider grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        v-for="(item, i) in component?.content?.items || []"
+        :key="i"
+        class="card_item border rounded-lg overflow-hidden shadow-sm bg-white"
+      >
+        <img
+          v-if="item.file"
+          :src="item.file"
+          :alt="item.title || 'Card image'"
+          class="w-full h-44 object-cover"
+          loading="lazy"
+        />
+        <div class="p-4">
+          <h4 v-if="item.title" class="font-bold text-lg mb-1">{{ item.title }}</h4>
+          <p v-if="item.text" class="text-gray-600 text-sm mb-3">{{ item.text }}</p>
+          <a
+            v-if="item.link"
+            :href="item.link"
+            class="text-teal-700 font-semibold hover:underline inline-flex items-center gap-1 text-sm"
+          >
+            <span>Learn more</span>
+            <i class="pi pi-arrow-right text-xs"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
     <!-- Fallback -->
     <div v-else class="p-4 border border-dashed rounded text-gray-500">
       <span>{{ component.type }}</span>

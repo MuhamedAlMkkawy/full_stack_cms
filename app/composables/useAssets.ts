@@ -12,7 +12,7 @@ export function useAssets() {
    */
   const uploadAsset = async (
     fileOrUrl: File | string,
-    metadata?: { organization_id?: string; project_id?: string; filename?: string },
+    metadata?: { organization_id?: string; project_id?: string; filename?: string; folder?: string },
     onProgress?: (percent: number) => void
   ): Promise<Asset> => {
     uploading.value = true;

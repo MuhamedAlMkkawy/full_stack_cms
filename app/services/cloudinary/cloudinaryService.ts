@@ -144,6 +144,8 @@ export class CloudinaryService {
       folder?: string;
       onProgress?: (percent: number) => void;
       maxSizeMb?: number;
+      cloudName?: string;
+      uploadPreset?: string;
     }
   ): Promise<CloudinaryUploadResult> {
     return new Promise((resolve, reject) => {
@@ -154,8 +156,8 @@ export class CloudinaryService {
       }
 
       // 2. Validate configuration
-      const cloudName = this.getCloudName();
-      const uploadPreset = this.getUploadPreset();
+      const cloudName = options?.cloudName || this.getCloudName();
+      const uploadPreset = options?.uploadPreset || this.getUploadPreset();
 
       if (!cloudName || !uploadPreset) {
         return reject(
@@ -204,18 +206,26 @@ export class CloudinaryService {
               created_at: response.created_at || new Date().toISOString(),
             });
           } else {
-            const errorMsg =
+            let errorMsg =
               response.error?.message ||
               `Cloudinary upload failed with status ${xhr.status}`;
+
+            // Specific actionable guidance for "Unknown API key" error:
+            if (errorMsg.toLowerCase().includes('unknown api key')) {
+              errorMsg = `Cloudinary Error: The upload preset "${uploadPreset}" is either set to "Signed" mode or does not exist under Cloud Name "${cloudName}". In Cloudinary Console -> Settings -> Upload -> Upload presets, edit "${uploadPreset}" and change Signing Mode to "Unsigned".`;
+            }
+
             reject(new Error(errorMsg));
           }
-        } catch (e: any) {
-          reject(new Error(`Failed to parse Cloudinary response: ${xhr.statusText}`));
+        } catch {
+          reject(new Error(`Failed to parse Cloudinary response (HTTP ${xhr.status}): ${xhr.responseText || xhr.statusText}`));
         }
       };
 
       xhr.onerror = () => {
-        reject(new Error('Network error occurred while uploading to Cloudinary. Check your internet connection.'));
+        reject(
+          new Error('Network error occurred while uploading to Cloudinary. Check your internet connection or CORS settings.')
+        );
       };
 
       xhr.ontimeout = () => {
@@ -225,7 +235,42 @@ export class CloudinaryService {
       xhr.send(formData);
     });
   }
+
+  /**
+   * Perform a lightweight test upload to verify Cloudinary configuration.
+   */
+  public async testUpload(
+    cloudName?: string,
+    uploadPreset?: string
+  ): Promise<{ success: boolean; message: string; url?: string }> {
+    try {
+      // 1x1 transparent PNG blob
+      const byteCharacters = atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const testBlob = new Blob([byteArray], { type: 'image/png' });
+      const testFile = new File([testBlob], 'cloudinary_test.png', { type: 'image/png' });
+
+      const result = await this.uploadImage(testFile, {
+        cloudName,
+        uploadPreset,
+      });
+
+      return {
+        success: true,
+        message: 'Cloudinary configuration is valid! Unsigned upload succeeded.',
+        url: result.secure_url,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: err?.message || 'Cloudinary connection test failed.',
+      };
+    }
+  }
 }
 
 export const cloudinaryService = new CloudinaryService();
-

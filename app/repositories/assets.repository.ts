@@ -46,7 +46,7 @@ export class AssetsRepository extends BaseRepository<Asset> {
    */
   public async uploadAsset(
     fileOrUrl: File | string,
-    metadata?: { organization_id?: string; project_id?: string; filename?: string },
+    metadata?: { organization_id?: string; project_id?: string; filename?: string; folder?: string },
     onProgress?: (percent: number) => void
   ): Promise<Asset> {
     const context = this.resolveContextIds(metadata);
@@ -77,7 +77,7 @@ export class AssetsRepository extends BaseRepository<Asset> {
     }
 
     const uploadRes = await cloudinaryService.uploadImage(file, {
-      folder: 'cms_assets',
+      folder: metadata?.folder,
       onProgress,
     });
 
